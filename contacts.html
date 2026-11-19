@@ -1,20 +1,22 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Контакты — KOROLEV</title><meta name="description" content="Архитектура и дизайн частных пространств: проектирование домов, дизайн интерьеров, планировки и 3D-визуализация."><meta name="theme-color" content="#161b1f">
+<title>Контакты — KOROLEV</title><meta name="description" content="Архитектура и дизайн частных пространств: проектирование домов, дизайн интерьеров, планировки и 3D-визуализация.">
+<meta name="theme-color" content="#161b1f">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css"></head><body>
+<script>try{var t=localStorage.getItem('k-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="style.css"></head><body data-p="contacts">
 <header><div class="wrap bar"><a class="logo" href="index.html">KOROLEV</a>
-<nav id="nav" aria-label="Основное меню"><ul><li><a href="index.html">Главная</a></li><li><a href="services.html">Услуги</a></li><li><a href="portfolio.html">Портфолио</a></li><li><a href="prices.html">Цены</a></li><li><a href="about.html">О студии</a></li><li><a href="reviews.html">Отзывы</a></li><li><a href="contacts.html" aria-current="page">Контакты</a></li></ul></nav>
-<a class="btn cta-top" href="contacts.html">Обсудить проект</a>
-<button class="menu" aria-expanded="false" aria-controls="nav" onclick="var n=document.getElementById('nav');this.setAttribute('aria-expanded',n.classList.toggle('open'))">Меню</button></div></header>
-<main><div class="wrap page-head"><h1>Расскажите о своём проекте</h1><p class="lead">Опишите задачу, укажите тип объекта и приложите исходные материалы. Ответим в Telegram.</p></div><section><div class="wrap split"><div><h2>Написать напрямую</h2><p class="note">Быстрый способ обсудить проект и отправить файлы.</p><p><a class="btn" href="https://t.me/vosopo">Открыть @vosopo</a></p></div>
-<form id="f"><h2>Оставить запрос</h2>
-<label>Ваше имя<input name="n" placeholder="Как к вам обращаться" autocomplete="name"></label>
-<label>Тип проекта<select name="t"><option>Дизайн квартиры</option><option>Дизайн частного дома</option><option>Архитектурное проектирование</option><option>Планировка и 3D</option></select></label>
-<label>Площадь или размеры (если известны)<input name="a" placeholder="Например, 75 м²"></label>
-<label>Описание задачи<textarea name="d" placeholder="Расскажите, что требуется сделать"></textarea></label>
-<button class="btn" type="submit">Подготовить заявку в Telegram</button>
-<p class="note">Откроется Telegram с готовым текстом — останется нажать «Отправить». Форма сама ничего не передаёт.</p></form></div></section>
-<script>document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();var v=this.elements,m='Здравствуйте! Меня зовут '+(v.n.value||'—')+'.\nТип проекта: '+v.t.value+'\nПлощадь: '+(v.a.value||'—')+'\nЗадача: '+(v.d.value||'—');window.open('https://t.me/vosopo?text='+encodeURIComponent(m),'_blank','noopener')})</script></main>
-<footer><div class="wrap"><div><strong style="color:var(--ink)">KOROLEV</strong><br>Архитектура и дизайн частных пространств</div><ul><li><a href="index.html">Главная</a></li><li><a href="services.html">Услуги</a></li><li><a href="portfolio.html">Портфолио</a></li><li><a href="prices.html">Цены</a></li><li><a href="about.html">О студии</a></li><li><a href="reviews.html">Отзывы</a></li><li><a href="contacts.html">Контакты</a></li><li><a href="https://t.me/vosopo">Telegram</a></li></ul></div></footer>
-</body></html>
+<nav id="nav" aria-label="Menu"><ul><li><a href="index.html" data-i="n_index">Главная</a></li><li><a href="services.html" data-i="n_services">Услуги</a></li><li><a href="portfolio.html" data-i="n_portfolio">Портфолио</a></li><li><a href="prices.html" data-i="n_prices">Цены</a></li><li><a href="about.html" data-i="n_about">О студии</a></li><li><a href="reviews.html" data-i="n_reviews">Отзывы</a></li><li><a href="contacts.html" aria-current="page" data-i="n_contacts">Контакты</a></li></ul></nav>
+<div class="tools"><a class="btn cta-top" href="contacts.html" data-i="cta">Обсудить проект</a>
+<button class="ic" id="lg" type="button" aria-label="Language">EN</button><button class="ic" id="th" type="button" aria-label="Theme">◐</button>
+<button class="menu" type="button" aria-expanded="false" aria-controls="nav" onclick="var n=document.getElementById('nav');this.setAttribute('aria-expanded',n.classList.toggle('open'))" data-i="menu">Меню</button></div></div></header>
+<main><div class="wrap page-head"><h1 data-i="h_contacts">Расскажите о своём проекте</h1><p class="lead" data-i="l_contacts">Опишите задачу, укажите тип объекта и приложите исходные материалы. Ответим в Telegram.</p></div><section><div class="wrap"><div class="split"><div><h2 data-i="hd">Написать напрямую</h2><p class="note" data-i="nd">Быстрый способ обсудить проект и отправить файлы.</p><p><a class="btn" href="https://t.me/vosopo">@vosopo</a></p></div>
+<form id="f"><h2 data-i="hr">Оставить запрос</h2>
+<label><span data-i="fn">Ваше имя</span><input name="n" autocomplete="name" data-ip="fnp" placeholder="Как к вам обращаться"></label>
+<label><span data-i="ft">Тип проекта</span><select name="t"><option data-i="t1">Дизайн квартиры</option><option data-i="t2">Дизайн частного дома</option><option data-i="t3">Архитектурное проектирование</option><option data-i="t4">Планировка и 3D</option></select></label>
+<label><span data-i="fa">Площадь или размеры (если известны)</span><input name="a" data-ip="fap" placeholder="Например, 75 м²"></label>
+<label><span data-i="fd">Описание задачи</span><textarea name="d" data-ip="fdp" placeholder="Расскажите, что требуется сделать"></textarea></label>
+<button class="btn" type="submit" data-i="fs">Подготовить заявку в Telegram</button>
+<p class="note" data-i="fx">Откроется Telegram с готовым текстом — останется нажать «Отправить». Форма сама ничего не передаёт.</p></form></div></div></section></main>
+<footer><div class="wrap"><div><strong style="color:var(--ink)">KOROLEV</strong><br><span data-i="tag">Архитектура и дизайн частных пространств</span></div><ul><li><a href="index.html" data-i="n_index">Главная</a></li><li><a href="services.html" data-i="n_services">Услуги</a></li><li><a href="portfolio.html" data-i="n_portfolio">Портфолио</a></li><li><a href="prices.html" data-i="n_prices">Цены</a></li><li><a href="about.html" data-i="n_about">О студии</a></li><li><a href="reviews.html" data-i="n_reviews">Отзывы</a></li><li><a href="contacts.html" data-i="n_contacts">Контакты</a></li><li><a href="https://t.me/vosopo">Telegram</a></li></ul></div></footer>
+<script src="script.js"></script></body></html>
