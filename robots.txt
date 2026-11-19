@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://korolev.github.io/sitemap.xml
+Sitemap: https://cuapfss.github.io/Korolev/sitemap.xml
