@@ -194,3 +194,39 @@ a{transition:color .2s ease}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* KOROLEV motion update — intro, page transitions, parallax and lime interactions */
+.korolev-preloader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:var(--paper);opacity:1;visibility:visible;transition:opacity .55s cubic-bezier(.2,.7,.2,1),visibility .55s;pointer-events:none}
+.korolev-preloader.is-hidden{opacity:0;visibility:hidden}
+.korolev-preloader__inner{display:grid;justify-items:center;gap:1.1rem}
+.korolev-preloader__logo{font-size:clamp(2.8rem,9vw,6rem);font-weight:600;letter-spacing:.12em;line-height:1;color:var(--ink);animation:korolev-logo-in .85s cubic-bezier(.2,.7,.2,1) both}
+.korolev-preloader__logo span{color:var(--lime);display:inline-block;animation:korolev-line-in .9s .2s both}
+.korolev-preloader__line{width:clamp(90px,18vw,160px);height:2px;background:var(--line);overflow:hidden}
+.korolev-preloader__line:after{content:"";display:block;width:42%;height:100%;background:var(--lime);animation:korolev-loader-line 1.05s ease-in-out infinite}
+@keyframes korolev-logo-in{from{opacity:0;transform:translateY(12px);letter-spacing:.28em;filter:blur(5px)}to{opacity:1;transform:translateY(0);letter-spacing:.12em;filter:blur(0)}}
+@keyframes korolev-line-in{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+@keyframes korolev-loader-line{from{transform:translateX(-110%)}to{transform:translateX(260%)}}
+html.page-leaving body{opacity:.25;filter:brightness(.65);transform:translateY(4px);transition:opacity .22s ease,filter .22s ease,transform .22s ease}
+body{transition:opacity .22s ease,filter .22s ease,transform .22s ease}
+.logo-letter{display:inline-block;transition:transform .28s cubic-bezier(.2,.7,.2,1),color .28s ease}
+.logo:hover .logo-letter,.side-brand:hover .logo-letter{transform:translateY(-2px);color:var(--lime)}
+.logo-letter:nth-child(2n){transition-delay:25ms}
+.logo-letter:nth-child(3n){transition-delay:50ms}
+.logo-letter:nth-child(4n){transition-delay:75ms}
+.hero-content{will-change:transform}
+.btn{position:relative;isolation:isolate;overflow:hidden;transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s ease,background-color .3s ease,color .3s ease,border-color .3s ease}
+.btn:before{content:"";position:absolute;inset:0;background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .38s cubic-bezier(.2,.7,.2,1);z-index:-1}
+.btn:hover:before{transform:scaleX(1)}
+.btn:not(.ghost):hover{background:transparent;color:var(--ink);border-color:var(--lime)}
+.btn.ghost:hover{background:transparent;color:var(--ink);border-color:var(--lime)}
+.gal figure{cursor:default}
+.gal figure:hover img{transform:scale(1.055);filter:brightness(.88) saturate(1.08)}
+@media(prefers-reduced-motion:no-preference){
+  .hero-content{transition:transform .12s linear}
+}
+@media(prefers-reduced-motion:reduce){
+  .korolev-preloader{display:none!important}
+  html.page-leaving body,body{opacity:1!important;filter:none!important;transform:none!important;transition:none!important}
+  .hero-content{transform:none!important}
+}
