@@ -1,7 +1,64 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111719"><title>Личный кабинет — KOROLEV</title><meta name="description" content="Личный кабинет клиентов архитектурной студии KOROLEV."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="account.css"></head>
-<body class="portal auth-page"><header class="portal-header"><div class="wrap portal-bar"><a class="logo" href="index.html">KOROLEV<span>.</span></a><div class="portal-header-right"><a href="index.html">На главную</a><span>CLIENT SPACE</span></div></div></header>
-<main class="auth-shell wrap"><section class="auth-intro"><p class="eyebrow">KOROLEV / PRIVATE SPACE</p><h1>Пространство<br>вашего проекта.</h1><p>Личный кабинет для работы над проектом вместе со студией: от первого брифа до готовой документации.</p><div class="auth-benefits"><div><span>01</span><p>Этапы и сроки проекта</p></div><div><span>02</span><p>Чертежи и документы в одном месте</p></div><div><span>03</span><p>Связь с командой студии</p></div></div><div class="intro-bottom">ФОРМА СЛЕДУЕТ ЗА СМЫСЛОМ <span>© KOROLEV</span></div></section>
-<section class="auth-panel" aria-label="Вход и регистрация"><div class="auth-panel-top"><span class="eyebrow">ВАШ АККАУНТ</span><span class="secure-mark">● SECURE ACCESS</span></div><div id="auth-view"><div class="auth-tabs" role="tablist"><button type="button" class="auth-tab active" data-mode="login">Войти</button><button type="button" class="auth-tab" data-mode="signup">Создать аккаунт</button></div><h2 id="auth-title">С возвращением.</h2><p class="auth-subtitle" id="auth-subtitle">Введите данные, чтобы открыть личный кабинет.</p><form id="auth-form"><label id="name-field" hidden>Ваше имя<input name="name" type="text" autocomplete="name" placeholder="Имя и фамилия"></label><label>Email<input name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label><label>Пароль<div class="password-wrap"><input name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Не менее 8 символов" required><button type="button" id="toggle-password" aria-label="Показать пароль">Показать</button></div></label><button class="auth-submit" type="submit" id="auth-submit">Войти в кабинет <span>↗</span></button><p class="auth-message" id="auth-message" role="status" aria-live="polite"></p></form><div class="auth-divider"><span>ЗАЩИЩЁННЫЙ ДОСТУП</span></div><p class="auth-legal">Создавая аккаунт, вы соглашаетесь использовать кабинет для общения и работы над проектами KOROLEV. Не отправляйте через него платёжные данные карты.</p></div>
-<div id="account-view" hidden><div class="signed-in-head"><div><p class="eyebrow">ACCOUNT / ACTIVE SESSION</p><h2>Вы вошли.</h2><p class="auth-subtitle">Аккаунт подключён к KOROLEV.</p></div><button class="signout" id="signout" type="button">Выйти</button></div><div class="account-identity"><span class="identity-icon">K</span><div><strong id="user-name">Клиент KOROLEV</strong><small id="user-email"></small></div></div><div class="account-next"><h3>Следующий шаг</h3><p>После заключения договора студия откроет доступ к вашему проекту, этапам, файлам и документам.</p><a href="contacts.html">Обсудить проект ↗</a></div><div class="account-links"><a href="contacts.html">Связаться со студией <span>↗</span></a><a href="index.html">Вернуться на сайт <span>↗</span></a></div><p class="auth-message" id="session-message" role="status"></p></div>
-<div class="auth-config-note" id="config-note">Для запуска регистрации требуется подключить проект Supabase. Интерфейс уже готов; до настройки не вводите здесь пароль.</div></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase/config.js"></script><script src="auth.js"></script></body></html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111512"><title>Личный кабинет — KOROLEV</title>
+<meta name="description" content="Личный кабинет клиентов архитектурной студии KOROLEV.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="account.css">
+</head>
+<body class="portal auth-page">
+<header class="portal-header"><div class="wrap portal-bar"><a class="logo" href="index.html">KOROLEV<span>.</span></a><div class="portal-header-right"><span>CLIENT SPACE</span><a href="index.html">На главную ↗</a></div></div></header>
+<main class="portal-wrap">
+<section class="auth-layout" id="auth-view">
+<div class="auth-copy"><p class="eyebrow">KOROLEV / PRIVATE SPACE</p><h1>Ваш проект.<br><em>В одном месте.</em></h1><p>Рабочее пространство для общения со студией, контроля этапов и хранения проектных материалов.</p><div class="auth-points"><span>01 — Прозрачные этапы и сроки</span><span>02 — Чертежи и документы</span><span>03 — Связь со студией</span></div></div>
+<div class="auth-card"><div class="card-kicker"><span>ДОСТУП К КАБИНЕТУ</span><span>● ЗАЩИЩЁННОЕ СОЕДИНЕНИЕ</span></div>
+<div class="auth-tabs"><button class="auth-tab active" type="button" data-mode="login">Войти</button><button class="auth-tab" type="button" data-mode="signup">Регистрация</button></div>
+<h2 id="auth-title">С возвращением.</h2><p class="auth-subtitle" id="auth-subtitle">Введите email и пароль, чтобы продолжить.</p>
+<form id="auth-form">
+<label id="name-field" hidden>Имя и фамилия<input name="name" autocomplete="name" placeholder="Как к вам обращаться"></label>
+<label>Email<input name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
+<label>Пароль<div class="password-wrap"><input name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Не менее 8 символов" required><button type="button" id="toggle-password">Показать</button></div></label>
+<button class="portal-primary" id="auth-submit" type="submit">Войти в кабинет <span>↗</span></button><p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+</form><p class="auth-footnote">Не отправляйте через кабинет данные банковских карт или пароли от сторонних сервисов.</p><div class="auth-config-note" id="config-note">Подключаем защищённый доступ…</div>
+</div></section>
+<section class="dashboard" id="account-view" hidden>
+<aside class="portal-sidebar">
+<a class="side-brand" href="index.html">KOROLEV<span>.</span></a>
+<div class="side-user"><div class="avatar" id="side-avatar">K</div><div><strong id="side-name">Клиент</strong><small id="side-email"></small></div></div>
+<nav class="portal-nav" aria-label="Разделы кабинета">
+<button class="portal-nav-item active" data-section="overview"><span>01</span>Обзор</button>
+<button class="portal-nav-item" data-section="projects"><span>02</span>Мои проекты</button>
+<button class="portal-nav-item" data-section="messages"><span>03</span>Сообщения</button>
+<button class="portal-nav-item" data-section="files"><span>04</span>Документы</button>
+<button class="portal-nav-item" data-section="payments"><span>05</span>Оплата</button>
+<button class="portal-nav-item" data-section="settings"><span>06</span>Профиль и безопасность</button>
+</nav>
+<div class="sidebar-bottom"><a href="contacts.html">Связаться со студией ↗</a><button id="signout" type="button">Выйти из аккаунта</button></div>
+</aside>
+<div class="portal-main">
+<div class="dashboard-top"><div><p class="eyebrow">ЛИЧНЫЙ КАБИНЕТ / KOROLEV</p><h1 id="welcome-title">Добро пожаловать.</h1></div><span class="online-indicator">АККАУНТ АКТИВЕН</span></div>
+<section class="portal-section active" id="section-overview">
+<div class="overview-hero"><div><p class="eyebrow">ВАШЕ ПРОСТРАНСТВО</p><h2>Архитектура начинается<br>с хорошего диалога.</h2><p>Здесь будут появляться обновления, этапы и материалы ваших проектов.</p><a class="text-link" href="contacts.html">Обсудить новый проект ↗</a></div><div class="hero-index">K<span>.</span></div></div>
+<div class="stat-grid"><article><span>Активные проекты</span><strong id="project-count">0</strong><small>Закреплённых за аккаунтом</small></article><article><span>Непрочитанные сообщения</span><strong>—</strong><small>Раздел будет подключён к чату</small></article><article><span>Документы</span><strong>—</strong><small>Файлы ваших проектов</small></article></div>
+<div class="section-heading"><div><p class="eyebrow">01 / WORKSPACE</p><h2>Последние проекты</h2></div><button class="quiet-button" data-go="projects" type="button">Все проекты ↗</button></div>
+<div id="overview-projects" class="project-list"><div class="empty-state"><span>01</span><div><strong>Пока нет проектов</strong><p>После согласования задачи студия добавит проект в ваш кабинет.</p></div></div></div>
+</section>
+<section class="portal-section" id="section-projects"><div class="section-heading"><div><p class="eyebrow">02 / YOUR WORK</p><h2>Мои проекты</h2><p>Статус, прогресс и основные сведения.</p></div></div><div id="projects-list" class="project-list"><div class="empty-state">Загружаем проекты…</div></div></section>
+<section class="portal-section" id="section-messages"><div class="section-heading"><div><p class="eyebrow">03 / COMMUNICATION</p><h2>Сообщения</h2><p>Переписка с командой по каждому проекту.</p></div></div><div class="empty-state"><span>03</span><div><strong>Чат будет доступен после подключения проекта</strong><p>История общения будет храниться внутри кабинета.</p></div></div></section>
+<section class="portal-section" id="section-files"><div class="section-heading"><div><p class="eyebrow">04 / DOCUMENTS</p><h2>Документы и файлы</h2><p>Чертежи, PDF, договоры и материалы проекта.</p></div></div><div class="empty-state"><span>04</span><div><strong>Пока нет файлов</strong><p>Материалы появятся здесь, когда студия прикрепит их к проекту.</p></div></div></section>
+<section class="portal-section" id="section-payments"><div class="section-heading"><div><p class="eyebrow">05 / FINANCE</p><h2>Оплата</h2><p>История платежей и финансовые документы.</p></div></div><div class="empty-state"><span>05</span><div><strong>Платежей пока нет</strong><p>Суммы и статусы будут отображаться после оформления проекта.</p></div></div></section>
+<section class="portal-section" id="section-settings"><div class="section-heading"><div><p class="eyebrow">06 / ACCOUNT</p><h2>Профиль и безопасность</h2><p>Управляйте данными и настройками входа.</p></div></div>
+<div class="settings-grid">
+<article class="settings-card profile-settings"><h3>Личные данные</h3><div class="avatar-editor"><div class="avatar large" id="settings-avatar">K</div><div><strong>Фотография профиля</strong><p>JPG, PNG или WebP. До 3 МБ.</p><label class="upload-button">Загрузить фото<input id="avatar-input" type="file" accept="image/png,image/jpeg,image/webp"></label></div></div>
+<form id="profile-form"><label>Отображаемое имя<input id="display-name" name="display_name" maxlength="80" placeholder="Имя и фамилия" required></label><label>Email аккаунта<input id="profile-email" type="email" disabled></label><button class="portal-primary compact" type="submit">Сохранить профиль <span>↗</span></button><p class="form-feedback" id="profile-feedback" role="status"></p></form></article>
+<article class="settings-card"><h3>Смена пароля</h3><p>Используйте уникальный пароль длиной не менее 8 символов.</p><form id="password-form"><label>Новый пароль<input name="new_password" type="password" minlength="8" autocomplete="new-password" required></label><label>Повторите пароль<input name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></label><button class="portal-secondary" type="submit">Обновить пароль</button><p class="form-feedback" id="password-feedback" role="status"></p></form></article>
+<article class="settings-card security-card"><div class="settings-title-row"><div><h3>Двухфакторная аутентификация</h3><p>Дополнительный код из приложения-аутентификатора при входе.</p></div><span class="security-state" id="mfa-state">Проверка…</span></div><div id="mfa-enroll"><button class="portal-secondary" id="mfa-start" type="button">Настроить 2FA</button></div><div id="mfa-verify" hidden><p>Добавьте этот аккаунт в приложение-аутентификатор, затем введите код из 6 цифр.</p><img id="mfa-qr" alt="QR-код для настройки двухфакторной аутентификации"><label>Код подтверждения<input id="mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label><button class="portal-primary compact" id="mfa-confirm" type="button">Подтвердить 2FA</button><p class="form-feedback" id="mfa-feedback" role="status"></p></div><div id="mfa-disable" hidden><button class="portal-secondary danger-button" id="mfa-remove" type="button">Отключить 2FA</button></div></article>
+</div></section>
+<p class="global-feedback" id="session-message" role="status" aria-live="polite"></p>
+<footer class="portal-footer"><span>© KOROLEV — PRIVATE CLIENT SPACE</span><a href="index.html">На главную ↗</a></footer>
+</div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase/config.js"></script><script src="auth.js"></script>
+</body></html>
