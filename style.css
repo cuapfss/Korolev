@@ -77,3 +77,24 @@ details{border-top:1px solid var(--line);padding:1rem 0}details:last-child{borde
   .bar nav a{font-size:.75rem}
   .bar .cta-top{display:none}
 }
+
+
+/* KOROLEV visual system — consistent across public pages */
+:root{--paper:#121713;--ink:#edf0e9;--mute:#a0aa9d;--line:#303a31;--blue:#b6c4a7;--card:#1a211b}
+:root[data-theme=dark]{--paper:#121713;--ink:#edf0e9;--mute:#a0aa9d;--line:#303a31;--blue:#b6c4a7;--card:#1a211b}
+:root[data-theme=light]{--paper:#f0f1e9;--ink:#1b211b;--mute:#687266;--line:#d0d6ca;--blue:#52694d;--card:#fafbf6}
+body{background:var(--paper);color:var(--ink)}
+header{background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(16px)}
+.logo{letter-spacing:.18em}
+nav a{transition:color .2s,border-color .2s}
+.btn,.ic,.menu,input,select,textarea,details,.gal img{border-radius:9px}
+.btn{border-color:var(--blue);background:var(--blue);color:#1b241b}
+.btn:hover{background:transparent;color:var(--ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.ic,.menu{border-color:var(--line);background:var(--card)}
+input,select,textarea{background:var(--card);border-color:var(--line);color:var(--ink)}
+.list>div{border-top-color:var(--blue)}
+.gal img{border:1px solid var(--line)}
+footer{border-color:var(--line)}
+@media(max-width:860px){nav{background:var(--paper)}}
