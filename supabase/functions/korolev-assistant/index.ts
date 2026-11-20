@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         instructions: systemPrompt,
         input: [{ role: "user", content: inputContent }],
         tools: [{ type: "image_generation", model: "gpt-image-2.5-flare" }],
-        tool_choice: "auto",
+        tool_choice: (!image && /(?:сгенер|создай|нарисуй|мудборд|визуализ|generate|create|draw|moodboard|visuali[sz]e)/i.test(message)) ? { type: "image_generation" } : "auto",
         max_output_tokens: 900,
         safety_identifier: await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userData.user.id + ":korolev-assistant")).then(buf => Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, "0")).join("")),
       }),
