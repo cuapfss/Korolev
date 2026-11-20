@@ -8,8 +8,11 @@ const say=(id,msg,error=false)=>{const el=$(id);el.textContent=msg;el.classList.
 async function load(){
 const {data:projects,error:pErr}=await client.from("projects").select("id,title,project_type,status,progress_percent,created_at,project_members(user_id,profiles(display_name,email))").order("created_at",{ascending:false});
 const {data:clients,error:cErr}=await client.from("profiles").select("id,display_name,email,created_at").eq("role","client").order("created_at",{ascending:false});
-if(pErr)throw pErr;if(cErr)throw cErr;
+const {data:requests,error:rErr}=await client.from("project_requests").select("*").order("created_at",{ascending:false});
+if(pErr)throw pErr;if(cErr)throw cErr;if(rErr)throw rErr;
 $("admin-client-count").textContent=(clients||[]).length;$("admin-project-count").textContent=(projects||[]).length;$("admin-active-count").textContent=(projects||[]).filter(p=>!["completed","archived"].includes(p.status)).length;
+$("admin-request-count").textContent=(requests||[]).filter(r=>r.status==="new").length;
+$("admin-requests").innerHTML=(requests||[]).length?requests.map(r=>'<tr><td>'+new Date(r.created_at).toLocaleDateString("ru-RU")+'</td><td><strong>'+esc(r.name)+'</strong><small>'+esc(r.email)+'</small><small>'+esc(r.contact_method)+'</small></td><td>'+esc(r.project_type)+'</td><td><small>Площадь: '+esc(r.area||"—")+'</small><small>Локация: '+esc(r.location||"—")+'</small><small>Услуги: '+esc(r.services||"—")+'</small><small>Бюджет: '+esc(r.budget||"—")+'</small><small>'+esc(r.description||"")+'</small>'+(r.references_url?'<small><a href="'+esc(r.references_url)+'" target="_blank" rel="noopener">Референсы ↗</a></small>':'')+'</td><td><select class="request-status" data-request-id="'+esc(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select></td></tr>').join(""):'<tr><td colspan="5">Заявок пока нет.</td></tr>';
 $("admin-projects").innerHTML=(projects||[]).length?projects.map(p=>{const member=p.project_members?.[0]?.profiles;return '<tr><td><strong>'+esc(p.title)+'</strong><small>'+esc(p.project_type||"")+'</small></td><td>'+esc(member?.display_name||member?.email||"Не назначен")+'</td><td>'+esc(p.status)+'</td><td><div class="admin-project-progress"><span style="width:'+Math.max(0,Math.min(100,Number(p.progress_percent)||0))+'%"></span></div></td></tr>'}).join(""):'<tr><td colspan="4">Проектов пока нет.</td></tr>';
 $("admin-clients").innerHTML=(clients||[]).length?clients.map(c=>'<tr><td>'+esc(c.display_name||"Клиент")+'</td><td>'+esc(c.email)+'</td><td>'+new Date(c.created_at).toLocaleDateString("ru-RU")+'</td></tr>').join(""):'<tr><td colspan="3">Клиентов пока нет.</td></tr>';
 }
@@ -31,6 +34,14 @@ if(error){say("admin-form-message",error.message,true);return}
 const {error:memberError}=await client.from("project_members").insert({project_id:project.id,user_id:clientProfile.id,access_role:"client"});
 if(memberError){say("admin-form-message","Проект создан, но клиент не закреплён: "+memberError.message,true);return}
 f.reset();say("admin-form-message","Проект создан и закреплён за клиентом.");await load();
+});
+$("admin-requests").addEventListener("change",async e=>{
+const select=e.target.closest(".request-status");if(!select)return;
+select.disabled=true;
+const {error}=await client.from("project_requests").update({status:select.value}).eq("id",select.dataset.requestId);
+select.disabled=false;
+if(error){say("admin-feedback","Не удалось изменить статус заявки: "+error.message,true);return}
+say("admin-feedback","Статус заявки обновлён.");await load();
 });
 $("refresh-admin").addEventListener("click",()=>load().catch(e=>say("admin-feedback",e.message,true)));
 $("admin-signout").addEventListener("click",async()=>{await client.auth.signOut();location.href="account.html"});
