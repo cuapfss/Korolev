@@ -33,3 +33,8 @@ drop policy if exists "Users delete own avatar" on storage.objects;
 create policy "Users delete own avatar" on storage.objects
 for delete to authenticated
 using (bucket_id='avatars' and (storage.foldername(name))[1]=auth.uid()::text);
+
+-- Required SQL privileges for the browser client; RLS policies still limit rows.
+grant usage on schema public to authenticated;
+grant select on public.profiles, public.projects, public.project_members to authenticated;
+grant update(display_name,avatar_url,updated_at) on public.profiles to authenticated;
