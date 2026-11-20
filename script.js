@@ -136,3 +136,58 @@ if('IntersectionObserver' in window){
   sections.forEach(function(section){section.classList.add('in')});
 }
 setL(L);
+
+
+// KOROLEV motion interactions: branded intro, gentle parallax and soft page transitions.
+(function(){
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var body=document.body;
+  if(!body)return;
+  // Wrap the visible wordmark letters without changing its text or language.
+  document.querySelectorAll('.logo,.side-brand').forEach(function(mark){
+    Array.prototype.slice.call(mark.childNodes).forEach(function(node){
+      if(node.nodeType!==Node.TEXT_NODE||!node.nodeValue.trim())return;
+      var frag=document.createDocumentFragment();
+      node.nodeValue.split('').forEach(function(char){
+        var span=document.createElement('span');
+        span.className='logo-letter';span.textContent=char===' '?'\u00a0':char;
+        frag.appendChild(span);
+      });
+      mark.replaceChild(frag,node);
+    });
+  });
+  if(reduce)return;
+  // Compact logo intro with a lime line; removed from layout as soon as it fades.
+  var intro=document.createElement('div');
+  intro.className='korolev-preloader';
+  intro.setAttribute('aria-hidden','true');
+  intro.innerHTML='<div class="korolev-preloader__inner"><div class="korolev-preloader__logo">KOROLEV<span>.</span></div><div class="korolev-preloader__line"></div></div>';
+  body.appendChild(intro);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){intro.classList.add('is-hidden')})});
+  window.setTimeout(function(){if(intro.parentNode)intro.parentNode.removeChild(intro)},850);
+  // Very restrained hero parallax; disabled on small screens and touch-first layouts.
+  var hero=document.querySelector('.hero-content');
+  var ticking=false;
+  if(hero&&window.matchMedia('(min-width: 861px)').matches&&!('ontouchstart' in window)){
+    window.addEventListener('scroll',function(){
+      if(ticking)return;ticking=true;
+      requestAnimationFrame(function(){
+        var y=Math.min(window.scrollY,520);
+        hero.style.transform='translate3d(0,'+(y*.045)+'px,0)';
+        ticking=false;
+      });
+    },{passive:true});
+  }
+  // Fade only ordinary same-site page links; leave forms, hashes and external links untouched.
+  document.addEventListener('click',function(event){
+    var link=event.target.closest&&event.target.closest('a[href]');
+    if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+    if(link.target&&link.target!=='_self'||link.hasAttribute('download'))return;
+    var url;
+    try{url=new URL(link.href,window.location.href)}catch(e){return}
+    if(url.origin!==window.location.origin||url.pathname===window.location.pathname&&url.search===window.location.search||url.hash&&url.pathname===window.location.pathname&&url.search===window.location.search)return;
+    event.preventDefault();
+    document.documentElement.classList.add('page-leaving');
+    window.setTimeout(function(){window.location.href=url.href},230);
+  });
+})();
