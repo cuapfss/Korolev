@@ -21,7 +21,7 @@
 <label>Email<input name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
 <label>Пароль<div class="password-wrap"><input name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Не менее 8 символов" required><button type="button" id="toggle-password">Показать</button></div></label>
 <button class="portal-primary" id="auth-submit" type="submit">Войти в кабинет <span>↗</span></button><p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
-</form><p class="auth-footnote">Не отправляйте через кабинет данные банковских карт или пароли от сторонних сервисов.</p><div class="auth-config-note" id="config-note">Подключаем защищённый доступ…</div>
+</form><div class="login-mfa" id="login-mfa" hidden><p>Для входа требуется код двухфакторной аутентификации.</p><label>Код из приложения<input id="login-mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label><button class="portal-primary" id="login-mfa-submit" type="button">Подтвердить вход ↗</button><p class="auth-message" id="login-mfa-feedback" role="status"></p></div><p class="auth-footnote">Не отправляйте через кабинет данные банковских карт или пароли от сторонних сервисов.</p><div class="auth-config-note" id="config-note">Подключаем защищённый доступ…</div>
 </div></section>
 <section class="dashboard" id="account-view" hidden>
 <aside class="portal-sidebar">
