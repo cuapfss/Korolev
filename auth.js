@@ -158,7 +158,7 @@
     return text
       .replace(/^Заявка от /,"Inquiry from ")
       .replace(/ \(контакт: /," (contact: ")
-      .replace(/\)\. Откройте панель управления\.$/," ). Open the admin panel.")
+      .replace(/\)\. Откройте панель управления\.$/,"). Open the admin panel.")
       .replace(/^Заявка KOROLEV: /,"KOROLEV inquiry: ");
   }
   async function loadNotifications(){
