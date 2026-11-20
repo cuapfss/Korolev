@@ -72,15 +72,30 @@ if(calculator){
     .catch(function(){});
 }
 var form=document.getElementById('f');
-if(form)form.addEventListener('submit',function(event){
-  event.preventDefault();
-  var values=this.elements,d=D[L];
-  var message=d.m_hi+' '+(values.n.value||'—')+'.\n'+
-    d.m_type+': '+values.t.value+'\n'+
-    d.m_area+': '+(values.a.value||'—')+'\n'+
-    d.m_task+': '+(values.d.value||'—');
+if(form){
+ var briefSteps=Array.prototype.slice.call(form.querySelectorAll('.brief-step')),briefIndex=0;
+ var briefPrev=document.getElementById('brief-prev'),briefNext=document.getElementById('brief-next'),briefSubmit=document.getElementById('brief-submit');
+ function showBriefStep(){
+  briefSteps.forEach(function(step,i){step.classList.toggle('active',i===briefIndex)});
+  if(briefPrev)briefPrev.disabled=briefIndex===0;
+  if(briefNext)briefNext.hidden=briefIndex===briefSteps.length-1;
+  if(briefSubmit)briefSubmit.hidden=briefIndex!==briefSteps.length-1;
+  var label=document.getElementById('brief-step-label'),bar=document.getElementById('brief-progress-bar');
+  if(label)label.textContent=(L==='ru'?'Шаг ':'Step ')+(briefIndex+1)+(L==='ru'?' из ':' of ')+briefSteps.length;
+  if(bar)bar.style.width=((briefIndex+1)/briefSteps.length*100)+'%';
+ }
+ if(briefNext)briefNext.onclick=function(){var req=briefSteps[briefIndex].querySelectorAll('[required]');for(var i=0;i<req.length;i++){if(!req[i].reportValidity())return}briefIndex=Math.min(briefIndex+1,briefSteps.length-1);showBriefStep()};
+ if(briefPrev)briefPrev.onclick=function(){briefIndex=Math.max(0,briefIndex-1);showBriefStep()};
+ showBriefStep();
+ form.addEventListener('submit',function(event){
+  event.preventDefault();var v=this.elements;
+  var message=(L==='ru'?'Заявка KOROLEV':'KOROLEV project request')+'\\n'+
+  'Name: '+(v.n.value||'—')+'\\nEmail: '+(v.email.value||'—')+'\\nContact: '+v.contact.value+'\\n'+
+  'Project: '+v.t.value+'\\nArea: '+(v.a.value||'—')+'\\nLocation: '+(v.location.value||'—')+'\\n'+
+  'Services: '+v.services.value+'\\nBudget: '+v.budget.value+'\\nTask: '+(v.d.value||'—')+'\\nReferences: '+(v.references.value||'—');
   window.open('https://t.me/vosopo?text='+encodeURIComponent(message),'_blank','noopener');
-});
+ });
+}
 var sections=document.querySelectorAll('section');
 if('IntersectionObserver' in window){
   var observer=new IntersectionObserver(function(entries){
