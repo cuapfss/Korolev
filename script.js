@@ -93,7 +93,7 @@ if(form){
   contactLabel.textContent=telegram?(L==='ru'?'Telegram для связи':'Telegram contact'):(L==='ru'?'Email для связи':'Contact email');
   contactInput.type=telegram?'text':'email';
   contactInput.autocomplete=telegram?'off':'email';
-  contactInput.placeholder=telegram?'@username или ссылка t.me/username':'name@example.com';
+  contactInput.placeholder=telegram?(L==='ru'?'@username или ссылка t.me/username':'@username or t.me/username link'):'name@example.com';
  }
  contactSelect.addEventListener('change',updateContactField);
  updateContactField();
