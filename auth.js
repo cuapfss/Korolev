@@ -95,8 +95,26 @@
     const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
     if(error){say($("session-message"),"Не удалось загрузить заявки: "+error.message,true);return}
     const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
-    $("requests-list").innerHTML=(data||[]).length?data.map(r=>'<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleDateString("ru-RU")+' · '+escapeHtml(labels[r.status]||r.status)+'</small><small>'+escapeHtml([r.area,r.location].filter(Boolean).join(" · ")||"Детали не указаны")+'</small></div><span class="request-state">'+escapeHtml(labels[r.status]||r.status)+'</span></article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>Вы можете отправить первую заявку через форму ниже.</p></div></div>';
+    $("requests-list").innerHTML=(data||[]).length?data.map(r=>'<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleDateString("ru-RU")+' · '+escapeHtml(labels[r.status]||r.status)+'</small><small>'+escapeHtml([r.area,r.location].filter(Boolean).join(" · ")||"Детали не указаны")+'</small></div><span class="request-state">'+escapeHtml(labels[r.status]||r.status)+'</span></article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>После отправки заявки она появится здесь.</p></div></div>';
+    const inbox=$("studio-inbox");
+    if(inbox&&["admin","staff"].includes(profile?.role)){
+      inbox.hidden=false;
+      await loadStudioRequests();
+    }
   }
+  async function loadStudioRequests(){
+    const box=$("studio-requests");if(!box)return;
+    const {data,error}=await client.from("project_requests").select("id,name,email,contact_value,contact_method,project_type,area,location,services,budget,description,references_url,status,created_at").order("created_at",{ascending:false});
+    if(error){box.innerHTML='<div class="empty-state">Не удалось загрузить заявки: '+escapeHtml(error.message)+'</div>';return}
+    const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
+    box.innerHTML=(data||[]).length?data.map(r=>{
+      const contact=r.contact_value||r.email||"Не указан";
+      const method=r.contact_method||"Контакт";
+      const details=[r.area,r.location,r.services,r.budget].filter(Boolean).join(" · ");
+      return '<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.name)+' · '+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleString("ru-RU")+'</small><small>'+escapeHtml(method)+': '+escapeHtml(contact)+'</small><small>'+escapeHtml(details)+'</small>'+(r.description?'<p>'+escapeHtml(r.description)+'</p>':'')+(r.references_url?'<a href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select></label></article>';
+    }).join(""):'<div class="empty-state">Новых обращений пока нет.</div>';
+  }
+
   $("portal-request-form").addEventListener("submit",async e=>{
     e.preventDefault();const f=e.currentTarget,v=Object.fromEntries(new FormData(f).entries());say($("portal-request-feedback"),"Отправляем…");
     const {error}=await client.from("project_requests").insert({user_id:currentUser.id,name:profile?.display_name||currentUser.email,email:currentUser.email,contact_method:"Email",project_type:v.project_type.trim(),area:v.area.trim()||null,location:v.location.trim()||null,description:v.description.trim()||null});
@@ -116,6 +134,18 @@
     if(error){say($("session-message"),error.message,true);return}await loadNotifications();
   });
   $("notifications-refresh").addEventListener("click",()=>loadNotifications());
+  const studioInboxRefresh=$("studio-inbox-refresh");
+  if(studioInboxRefresh)studioInboxRefresh.addEventListener("click",loadStudioRequests);
+  const studioRequests=$("studio-requests");
+  if(studioRequests)studioRequests.addEventListener("change",async e=>{
+    const select=e.target.closest(".studio-request-status");if(!select)return;
+    select.disabled=true;
+    const {error}=await client.from("project_requests").update({status:select.value}).eq("id",select.dataset.requestId);
+    select.disabled=false;
+    if(error){say($("session-message"),"Не удалось обновить статус заявки: "+error.message,true);return}
+    say($("session-message"),"Статус заявки обновлён.");
+    await loadStudioRequests();
+  });
 
   function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   $("profile-form").addEventListener("submit",async e=>{e.preventDefault();const name=$("display-name").value.trim();if(!name)return;say($("profile-feedback"),"Сохраняем…");const {error}=await client.from("profiles").update({display_name:name,updated_at:new Date().toISOString()}).eq("id",currentUser.id);if(error){say($("profile-feedback"),error.message,true);return}await client.auth.updateUser({data:{full_name:name}});$("side-name").textContent=name;$("welcome-title").textContent="Здравствуйте, "+name.split(" ")[0]+".";setAvatar(profile?.avatar_url,name);say($("profile-feedback"),"Имя профиля обновлено.")});
