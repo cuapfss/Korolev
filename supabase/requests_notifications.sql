@@ -19,6 +19,10 @@ create table if not exists public.project_requests (
   updated_at timestamptz not null default now()
 );
 
+-- Keep existing installations compatible with the public request form.
+alter table public.project_requests add column if not exists contact_value text;
+alter table public.project_requests alter column email drop not null;
+
 create index if not exists project_requests_created_idx
   on public.project_requests(created_at desc);
 create index if not exists project_requests_user_idx
