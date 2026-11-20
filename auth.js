@@ -183,7 +183,7 @@
   const portalText={
     ru:{
       "portal-home-link":"На главную ↗","auth-title":"С возвращением.","auth-subtitle":"Введите email и пароль, чтобы продолжить.",
-      "welcome-title":"Добро пожаловать.","nav-overview":"Обзор","nav-projects":"Мои проекты","nav-messages":"Сообщения","nav-files":"Документы","nav-payments":"Оплата","nav-settings":"Профиль и безопасность",
+      "welcome-title":"Добро пожаловать.","nav-overview":"Обзор","nav-projects":"Мои проекты","nav-requests":"Заявки","nav-notifications":"Уведомления","nav-messages":"Сообщения","nav-files":"Документы","nav-payments":"Оплата","nav-settings":"Профиль и безопасность",
       "overview-title":"Архитектура начинается\\nс хорошего диалога.","overview-desc":"Здесь будут появляться обновления, этапы и материалы ваших проектов.",
       "overview-link":"Обсудить новый проект ↗","projects-title":"Мои проекты","messages-title":"Сообщения","files-title":"Документы и файлы","payments-title":"Оплата","settings-title":"Профиль и безопасность",
       "profile-title":"Личные данные","avatar-title":"Фотография профиля","avatar-desc":"JPG, PNG или WebP. До 3 МБ.","avatar-upload":"Загрузить фото",
@@ -193,7 +193,7 @@
     },
     en:{
       "portal-home-link":"Back to website ↗","auth-title":"Welcome back.","auth-subtitle":"Enter your email and password to continue.",
-      "welcome-title":"Welcome.","nav-overview":"Overview","nav-projects":"My projects","nav-messages":"Messages","nav-files":"Documents","nav-payments":"Payments","nav-settings":"Profile & security",
+      "welcome-title":"Welcome.","nav-overview":"Overview","nav-projects":"My projects","nav-requests":"Inquiries","nav-notifications":"Notifications","nav-messages":"Messages","nav-files":"Documents","nav-payments":"Payments","nav-settings":"Profile & security",
       "overview-title":"Architecture starts\\nwith a good conversation.","overview-desc":"Updates, project stages and materials will appear here.",
       "overview-link":"Discuss a new project ↗","projects-title":"My projects","messages-title":"Messages","files-title":"Documents & files","payments-title":"Payments","settings-title":"Profile & security",
       "profile-title":"Personal details","avatar-title":"Profile photo","avatar-desc":"JPG, PNG or WebP. Up to 3 MB.","avatar-upload":"Upload photo",
@@ -251,7 +251,7 @@
     document.documentElement.lang=lang;
     const button=$("portal-language");if(button)button.textContent=lang==="ru"?"EN":"RU";
     Object.keys(d).forEach(id=>{const el=$(id);if(el)el.textContent=d[id]});
-    const navKeys=["overview","projects","messages","files","payments","settings"];
+    const navKeys=["overview","projects","requests","notifications","messages","files","payments","settings"];
     document.querySelectorAll(".portal-nav-item").forEach((el,i)=>{const label=d["nav-"+navKeys[i]];if(label&&el.childNodes.length>1)el.childNodes[1].textContent=label});
     const authTitle=$("auth-title");if(authTitle&&!currentUser){authTitle.textContent=lang==="ru"?(mode==="login"?"С возвращением.":"Создайте аккаунт."):(mode==="login"?"Welcome back.":"Create your account.");}
     const authSubtitle=$("auth-subtitle");if(authSubtitle&&!currentUser)authSubtitle.textContent=lang==="ru"?(mode==="login"?"Введите email и пароль, чтобы продолжить.":"Зарегистрируйтесь, чтобы работать со студией в одном пространстве."):(mode==="login"?"Enter your email and password to continue.":"Create an account to work with the studio in one place.");
