@@ -60,3 +60,20 @@ details{border-top:1px solid var(--line);padding:1rem 0}details:last-child{borde
 @media(prefers-reduced-motion:no-preference){.js section{transition:opacity .8s ease,transform .8s ease}.js section:not(.in){opacity:0;transform:translateY(12px)}}
 
 .brief-form{max-width:680px}.brief-progress{display:flex;align-items:center;gap:1rem;color:var(--mute);font-size:.85rem;margin:.5rem 0 1.5rem}.brief-track{height:3px;background:var(--line);flex:1;overflow:hidden}.brief-track span{display:block;height:100%;width:25%;background:var(--blue);transition:width .25s}.brief-step{display:none;gap:1rem}.brief-step.active{display:grid}.brief-actions{display:flex;gap:.7rem;justify-content:space-between;margin-top:.4rem}.brief-actions [hidden]{display:none!important}.brief-actions button:disabled{opacity:.4;cursor:not-allowed}
+
+/* Desktop navigation: keep every item on one line and give the account link room. */
+@media(min-width:861px){
+  .bar{gap:.75rem}
+  .bar nav{flex:1;min-width:0}
+  .bar nav ul{justify-content:center;gap:clamp(.55rem,1vw,.9rem);flex-wrap:nowrap}
+  .bar nav li{min-width:0}
+  .bar nav a{white-space:nowrap;font-size:clamp(.78rem,.85vw,.9rem)}
+  .bar .logo{white-space:nowrap}
+  .bar .tools{flex-shrink:0;gap:.4rem}
+  .bar .cta-top{white-space:nowrap;padding:.65rem .9rem;font-size:.88rem}
+}
+@media(min-width:861px) and (max-width:1120px){
+  .bar nav ul{gap:.5rem}
+  .bar nav a{font-size:.75rem}
+  .bar .cta-top{display:none}
+}
