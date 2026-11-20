@@ -87,18 +87,41 @@ if(form){
  if(briefNext)briefNext.onclick=function(){var req=briefSteps[briefIndex].querySelectorAll('[required]');for(var i=0;i<req.length;i++){if(!req[i].reportValidity())return}briefIndex=Math.min(briefIndex+1,briefSteps.length-1);showBriefStep()};
  if(briefPrev)briefPrev.onclick=function(){briefIndex=Math.max(0,briefIndex-1);showBriefStep()};
  showBriefStep();
+ var contactSelect=form.elements.contact,contactInput=form.elements.contact_value,contactLabel=document.getElementById('contact-value-label');
+ function updateContactField(){
+  var telegram=contactSelect.value==='Telegram';
+  contactLabel.textContent=telegram?(L==='ru'?'Telegram для связи':'Telegram contact'):(L==='ru'?'Email для связи':'Contact email');
+  contactInput.type=telegram?'text':'email';
+  contactInput.autocomplete=telegram?'off':'email';
+  contactInput.placeholder=telegram?'@username или ссылка t.me/username':'name@example.com';
+ }
+ contactSelect.addEventListener('change',updateContactField);
+ updateContactField();
+ var success=document.getElementById('brief-success'),successId=document.getElementById('brief-success-id');
+ var newRequest=document.getElementById('brief-new-request');
+ if(newRequest)newRequest.addEventListener('click',function(){success.hidden=true;form.hidden=false;form.reset();briefIndex=0;showBriefStep();updateContactField()});
  form.addEventListener('submit',async function(event){
-  event.preventDefault();var v=this.elements,feedback=document.getElementById('brief-feedback'),submit=document.getElementById('brief-submit');
+  event.preventDefault();
+  var v=this.elements,feedback=document.getElementById('brief-feedback'),submit=document.getElementById('brief-submit');
   var cfg=window.KOROLEV_SUPABASE||{},db=window.supabase&&window.supabase.createClient&&cfg.url&&cfg.anonKey?window.supabase.createClient(cfg.url,cfg.anonKey):null;
   if(!db){feedback.textContent=L==='ru'?'Сервис заявок пока не подключён. Напишите нам в Telegram.':'The request service is not configured yet. Please contact us on Telegram.';return}
-  submit.disabled=true;feedback.textContent=L==='ru'?'Отправляем заявку…':'Submitting your request…';
-  var userResult=await db.auth.getUser(),user=userResult.data&&userResult.data.user;
-  var payload={user_id:user?user.id:null,name:v.n.value.trim(),email:v.email.value.trim(),contact_method:v.contact.value,project_type:v.t.value,area:v.a.value.trim()||null,location:v.location.value.trim()||null,services:v.services.value,budget:v.budget.value,description:v.d.value.trim()||null,references_url:v.references.value.trim()||null};
-  var result=await db.from('project_requests').insert(payload).select('id').single();
-  submit.disabled=false;
-  if(result.error){feedback.textContent=(L==='ru'?'Не удалось сохранить заявку: ':'Could not save request: ')+result.error.message;return}
-  feedback.textContent=L==='ru'?'Заявка отправлена и сохранена. Мы свяжемся с вами по указанному контакту.':'Your request has been submitted. We will contact you using the details provided.';
-  form.reset();briefIndex=0;showBriefStep();
+  submit.disabled=true;
+  feedback.textContent=L==='ru'?'Отправляем заявку…':'Submitting your request…';
+  try{
+   var userResult=await db.auth.getUser(),user=userResult.data&&userResult.data.user;
+   var contactValue=v.contact_value.value.trim();
+   var method=v.contact.value;
+   var payload={user_id:user?user.id:null,name:v.n.value.trim(),email:method==='Email'?contactValue:null,contact_value:contactValue,contact_method:method,project_type:v.t.value,area:v.a.value.trim()||null,location:v.location.value.trim()||null,services:v.services.value,budget:v.budget.value,description:v.d.value.trim()||null,references_url:v.references.value.trim()||null};
+   var result=await db.from('project_requests').insert(payload).select('id').single();
+   if(result.error)throw result.error;
+   successId.textContent=result.data.id;
+   form.hidden=true;
+   success.hidden=false;
+  }catch(error){
+   feedback.textContent=(L==='ru'?'Не удалось отправить заявку. Данные сохранены в форме. Ошибка: ':'Could not submit the request. Your entries are still in the form. Error: ')+(error&&error.message?error.message:'Unknown error');
+  }finally{
+   submit.disabled=false;
+  }
  });
 }
 var sections=document.querySelectorAll('section');
