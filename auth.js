@@ -91,35 +91,47 @@
     $("portal-documents").innerHTML=docs.join("");
     $("portal-payments").innerHTML=payRes.error?'<div class="empty-state">'+escapeHtml(payRes.error.message)+'</div>':(payRes.data||[]).map(p=>'<article class="project-card"><div class="project-card-main"><strong>'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(Number(p.amount))+' '+escapeHtml(p.currency)+'</strong><small>'+escapeHtml(projectName(p.project_id))+' · '+escapeHtml(({pending:"Ожидает оплаты",paid:"Оплачен",failed:"Ошибка",refunded:"Возврат"})[p.status]||p.status)+'</small></div><small>'+new Date(p.paid_at||p.created_at).toLocaleDateString("ru-RU")+'</small></article>').join("")||'<div class="empty-state">Платежей пока нет.</div>';
   }
+  const requestStatusLabels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
+  function formatPortalDate(value){
+    if(!value)return "Дата не указана";
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return "Дата не указана";
+    return new Intl.DateTimeFormat("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
+  }
+  function requestField(label,value){
+    if(value===null||value===undefined||String(value).trim()==="")return "";
+    return '<div class="request-detail"><span>'+escapeHtml(label)+'</span><strong>'+escapeHtml(String(value))+'</strong></div>';
+  }
+  function requestDetails(r,includeContact){
+    const contact=r.contact_value||r.email||"";
+    const method=r.contact_method|| (r.email?"Email":"");
+    return (includeContact?requestField(method?("Связь · "+method):"Контакт",contact):"")+
+      requestField("Площадь",r.area)+requestField("Адрес объекта",r.location)+
+      requestField("Состав работ",r.services)+requestField("Бюджет",r.budget);
+  }
   async function loadRequests(){
-    const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
+    const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at,contact_method,contact_value,email,services,budget").eq("user_id",currentUser.id).order("created_at",{ascending:false});
     if(error){say($("session-message"),"Не удалось загрузить заявки: "+error.message,true);return}
-    const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
-    $("requests-list").innerHTML=(data||[]).length?data.map(r=>'<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleDateString("ru-RU")+' · '+escapeHtml(labels[r.status]||r.status)+'</small><small>'+escapeHtml([r.area,r.location].filter(Boolean).join(" · ")||"Детали не указаны")+'</small></div><span class="request-state">'+escapeHtml(labels[r.status]||r.status)+'</span></article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>После отправки заявки она появится здесь.</p></div></div>';
+    $("requests-list").innerHTML=(data||[]).length?data.map(r=>{
+      const status=requestStatusLabels[r.status]||r.status||"Статус не указан";
+      const details=requestDetails(r,true);
+      return '<article class="project-card request-item request-client-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Сведения</span><strong>Пока не заполнены</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+'</div><span class="request-state request-status-pill">'+escapeHtml(status)+'</span></article>';
+    }).join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>После отправки заявки она появится здесь.</p></div></div>';
     const inbox=$("studio-inbox");
     if(inbox&&["admin","staff"].includes(profile?.role)){
       inbox.hidden=false;
       await loadStudioRequests();
     }
   }
-  function formatPortalDate(value){
-    if(!value)return "Дата не указана";
-    const date=new Date(value);
-    if(Number.isNaN(date.getTime()))return "Дата не указана";
-    return new Intl.DateTimeFormat("ru-RU",{day:"2-digit",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
-  }
   async function loadStudioRequests(){
     const box=$("studio-requests");if(!box)return;
     const {data,error}=await client.from("project_requests").select("id,name,email,contact_value,contact_method,project_type,area,location,services,budget,description,references_url,status,created_at").order("created_at",{ascending:false});
     if(error){box.innerHTML='<div class="empty-state">Не удалось загрузить заявки: '+escapeHtml(error.message)+'</div>';return}
-    const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
-    const field=(label,value)=>value?'<div class="request-detail"><span>'+label+'</span><strong>'+escapeHtml(String(value))+'</strong></div>':"";
     box.innerHTML=(data||[]).length?data.map(r=>{
-      const contact=r.contact_value||r.email||"Не указан";
-      const method=r.contact_method||"Контакт";
-      const details=field("Контакт · "+method,contact)+field("Площадь",r.area)+field("Локация",r.location)+field("Услуги",r.services)+field("Бюджет",r.budget);
-      return '<article class="project-card request-item request-studio-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.name||"Без имени")+' — '+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Детали</span><strong>Не указаны</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+(r.references_url?'<a class="request-reference" href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Открыть референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select></label></article>';
-    }).join(""):'<div class="empty-state">Новых обращений пока нет.</div>';
+      const status=requestStatusLabels[r.status]||r.status||"Статус не указан";
+      const details=requestDetails(r,true);
+      return '<article class="project-card request-item request-studio-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.name||"Без имени")+' — '+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Сведения</span><strong>Не заполнены</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+(r.references_url?'<a class="request-reference" href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Открыть референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select><small class="request-status-current">'+escapeHtml(status)+'</small></label></article>';
+    }).join(""):'<div class="empty-state">Заявок пока нет.</div>';
   }
 
   $("portal-request-form").addEventListener("submit",async e=>{
