@@ -207,3 +207,7 @@
   .request-details-grid{grid-template-columns:1fr}
   .overview-hero:after{right:-30%;opacity:.5}
 }
+
+.request-card-top time{display:flex;flex-wrap:wrap;gap:.4rem;font-variant-numeric:tabular-nums}
+.request-client-card .project-card-main{min-width:0}
+.request-status-pill{flex-shrink:0}
