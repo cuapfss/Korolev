@@ -68,3 +68,74 @@ grant select, insert, update on public.projects to authenticated;
 grant select, insert, update on public.project_stages to authenticated;
 grant select, insert, update on public.project_documents to authenticated;
 grant select, insert, update on public.project_payments to authenticated;
+
+-- In-app notifications for project activity.
+create or replace function public.notify_project_message()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+declare recipient record;
+begin
+  if public.is_staff_or_admin() then
+    for recipient in
+      select user_id from public.project_members
+      where project_id=new.project_id and user_id<>new.sender_id
+    loop
+      insert into public.notifications(user_id,channel,title,body)
+      values(recipient.user_id,'in_app','Новое сообщение по проекту',left(new.body,180));
+    end loop;
+  else
+    for recipient in
+      select id from public.profiles where role in ('admin','staff')
+    loop
+      insert into public.notifications(user_id,channel,title,body)
+      values(recipient.id,'in_app','Сообщение от клиента','В проекте появилось новое сообщение.');
+    end loop;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_project_message_notify on public.project_messages;
+create trigger on_project_message_notify after insert on public.project_messages
+for each row execute procedure public.notify_project_message();
+
+create or replace function public.notify_project_update()
+returns trigger language plpgsql security definer set search_path = public
+as $$
+declare recipient record; notification_title text; notification_body text;
+begin
+  notification_title := case tg_table_name
+    when 'project_stages' then 'Обновлён этап проекта'
+    when 'project_files' then 'Добавлен файл проекта'
+    when 'project_documents' then 'Добавлен документ'
+    when 'project_payments' then 'Обновлена информация об оплате'
+    else 'Обновление проекта'
+  end;
+  notification_body := case tg_table_name
+    when 'project_stages' then coalesce(new.title,'Этап проекта')
+    when 'project_files' then coalesce(new.file_name,'Новый файл')
+    when 'project_documents' then coalesce(new.title,'Новый документ')
+    when 'project_payments' then 'Платёж: ' || coalesce(new.amount::text,'') || ' ' || coalesce(new.currency,'')
+    else 'В проекте есть обновление.'
+  end;
+  for recipient in
+    select user_id from public.project_members
+    where project_id=new.project_id and user_id<>auth.uid()
+  loop
+    insert into public.notifications(user_id,channel,title,body)
+    values(recipient.user_id,'in_app',notification_title,notification_body);
+  end loop;
+  return new;
+end;
+$$;
+drop trigger if exists on_project_stage_notify on public.project_stages;
+create trigger on_project_stage_notify after insert or update on public.project_stages
+for each row execute procedure public.notify_project_update();
+drop trigger if exists on_project_file_notify on public.project_files;
+create trigger on_project_file_notify after insert on public.project_files
+for each row execute procedure public.notify_project_update();
+drop trigger if exists on_project_document_notify on public.project_documents;
+create trigger on_project_document_notify after insert on public.project_documents
+for each row execute procedure public.notify_project_update();
+drop trigger if exists on_project_payment_notify on public.project_payments;
+create trigger on_project_payment_notify after insert on public.project_payments
+for each row execute procedure public.notify_project_update();
