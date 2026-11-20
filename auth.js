@@ -91,12 +91,14 @@
     $("portal-documents").innerHTML=docs.join("");
     $("portal-payments").innerHTML=payRes.error?'<div class="empty-state">'+escapeHtml(payRes.error.message)+'</div>':(payRes.data||[]).map(p=>'<article class="project-card"><div class="project-card-main"><strong>'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(Number(p.amount))+' '+escapeHtml(p.currency)+'</strong><small>'+escapeHtml(projectName(p.project_id))+' · '+escapeHtml(({pending:"Ожидает оплаты",paid:"Оплачен",failed:"Ошибка",refunded:"Возврат"})[p.status]||p.status)+'</small></div><small>'+new Date(p.paid_at||p.created_at).toLocaleDateString("ru-RU")+'</small></article>').join("")||'<div class="empty-state">Платежей пока нет.</div>';
   }
-  const requestStatusLabels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
+  const requestStatusLabels={ru:{new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"},en:{new:"New",reviewing:"Under review",accepted:"Accepted",declined:"Declined"}};
+  const requestLang=()=>((document.documentElement.lang||"ru")==="en"?"en":"ru");
+  const requestWord=(ru,en)=>requestLang()==="en"?en:ru;
   function formatPortalDate(value){
-    if(!value)return "Дата не указана";
+    if(!value)return requestWord("Дата не указана","Date not set");
     const date=new Date(value);
-    if(Number.isNaN(date.getTime()))return "Дата не указана";
-    return new Intl.DateTimeFormat("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
+    if(Number.isNaN(date.getTime()))return requestWord("Дата не указана","Date not set");
+    return new Intl.DateTimeFormat(requestLang()==="en"?"en-GB":"ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
   }
   function requestField(label,value){
     if(value===null||value===undefined||String(value).trim()==="")return "";
@@ -105,18 +107,19 @@
   function requestDetails(r,includeContact){
     const contact=r.contact_value||r.email||"";
     const method=r.contact_method|| (r.email?"Email":"");
-    return (includeContact?requestField(method?("Связь · "+method):"Контакт",contact):"")+
-      requestField("Площадь",r.area)+requestField("Адрес объекта",r.location)+
-      requestField("Состав работ",r.services)+requestField("Бюджет",r.budget);
+    return (includeContact?requestField(method?(requestWord("Связь · ","Contact · ")+method):requestWord("Контакт","Contact"),contact):"")+
+      requestField(requestWord("Площадь","Area"),r.area)+requestField(requestWord("Адрес объекта","Location"),r.location)+
+      requestField(requestWord("Состав работ","Services"),r.services)+requestField(requestWord("Бюджет","Budget"),r.budget);
   }
   async function loadRequests(){
     const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at,contact_method,contact_value,email,services,budget").eq("user_id",currentUser.id).order("created_at",{ascending:false});
-    if(error){say($("session-message"),"Не удалось загрузить заявки: "+error.message,true);return}
+    if(error){say($("session-message"),requestWord("Не удалось загрузить заявки: ","Could not load requests: ")+error.message,true);return}
+    const labels=requestStatusLabels[requestLang()];
     $("requests-list").innerHTML=(data||[]).length?data.map(r=>{
-      const status=requestStatusLabels[r.status]||r.status||"Статус не указан";
+      const status=labels[r.status]||r.status||requestWord("Статус не указан","Status not set");
       const details=requestDetails(r,true);
-      return '<article class="project-card request-item request-client-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Сведения</span><strong>Пока не заполнены</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+'</div><span class="request-state request-status-pill">'+escapeHtml(status)+'</span></article>';
-    }).join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>После отправки заявки она появится здесь.</p></div></div>';
+      return '<article class="project-card request-item request-client-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.project_type||requestWord("Тип проекта не указан","Project type not set"))+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>'+requestWord("Сведения","Details")+'</span><strong>'+requestWord("Пока не заполнены","Not provided")+'</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>'+requestWord("Описание задачи","Description")+'</span><p>'+escapeHtml(r.description)+'</p></div>':'')+'</div><span class="request-state request-status-pill">'+escapeHtml(status)+'</span></article>';
+    }).join(""):'<div class="empty-state"><span>01</span><div><strong>'+requestWord("Заявок пока нет","No requests yet")+'</strong><p>'+requestWord("После отправки заявки она появится здесь.","Your request will appear here after submission.")+'</p></div></div>';
     const inbox=$("studio-inbox");
     if(inbox&&["admin","staff"].includes(profile?.role)){
       inbox.hidden=false;
@@ -126,12 +129,13 @@
   async function loadStudioRequests(){
     const box=$("studio-requests");if(!box)return;
     const {data,error}=await client.from("project_requests").select("id,name,email,contact_value,contact_method,project_type,area,location,services,budget,description,references_url,status,created_at").order("created_at",{ascending:false});
-    if(error){box.innerHTML='<div class="empty-state">Не удалось загрузить заявки: '+escapeHtml(error.message)+'</div>';return}
+    if(error){box.innerHTML='<div class="empty-state">'+requestWord("Не удалось загрузить заявки: ","Could not load requests: ")+escapeHtml(error.message)+'</div>';return}
+    const labels=requestStatusLabels[requestLang()];
     box.innerHTML=(data||[]).length?data.map(r=>{
-      const status=requestStatusLabels[r.status]||r.status||"Статус не указан";
+      const status=labels[r.status]||r.status||requestWord("Статус не указан","Status not set");
       const details=requestDetails(r,true);
-      return '<article class="project-card request-item request-studio-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.name||"Без имени")+' — '+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Сведения</span><strong>Не заполнены</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+(r.references_url?'<a class="request-reference" href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Открыть референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select><small class="request-status-current">'+escapeHtml(status)+'</small></label></article>';
-    }).join(""):'<div class="empty-state">Заявок пока нет.</div>';
+      return '<article class="project-card request-item request-studio-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.name||requestWord("Без имени","Name not provided"))+' — '+escapeHtml(r.project_type||requestWord("Тип проекта не указан","Project type not set"))+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>'+requestWord("Сведения","Details")+'</span><strong>'+requestWord("Не заполнены","Not provided")+'</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>'+requestWord("Описание задачи","Description")+'</span><p>'+escapeHtml(r.description)+'</p></div>':'')+(r.references_url?'<a class="request-reference" href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">'+requestWord("Открыть референсы ↗","Open references ↗")+'</a>':'')+'</div><label class="request-status-label">'+requestWord("Статус","Status")+'<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>'+requestWord("Новая","New")+'</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>'+requestWord("На рассмотрении","Under review")+'</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>'+requestWord("Принята","Accepted")+'</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>'+requestWord("Отклонена","Declined")+'</option></select><small class="request-status-current">'+escapeHtml(status)+'</small></label></article>';
+    }).join(""):'<div class="empty-state">'+requestWord("Заявок пока нет.","No requests yet.")+'</div>';
   }
 
   $("portal-request-form").addEventListener("submit",async e=>{
@@ -290,6 +294,7 @@
     const headingMap=lang==="ru"?["Последние проекты","Мои проекты","Сообщения","Документы и файлы","Оплата","Профиль и безопасность"]:["Recent projects","My projects","Messages","Documents & files","Payments","Profile & security"];
     sections.forEach((el,i)=>{if(headingMap[i])el.textContent=headingMap[i]});
     translatePortalStatic(lang);
+    if(currentUser){loadRequests().catch(()=>{});loadNotifications().catch(()=>{});}
     try{localStorage.setItem("korolev-portal-lang",lang);localStorage.setItem("k-lang",lang)}catch(e){}
   }
   $("portal-language")?.addEventListener("click",()=>setPortalLanguage((document.documentElement.lang||"ru")==="ru"?"en":"ru"));
