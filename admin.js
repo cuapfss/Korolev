@@ -6,7 +6,7 @@ const client=window.supabase.createClient(cfg.url,cfg.anonKey);let adminUser=nul
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say=(id,msg,error=false)=>{const el=$(id);el.textContent=msg;el.classList.toggle("error",error)};
 async function load(){
-const {data:projects,error:pErr}=await client.from("projects").select("id,title,project_type,status,progress_percent,created_at,project_members(user_id,profiles(display_name,email))").order("created_at",{ascending:false});
+const {data:projects,error:pErr}=await client.from("projects").select("id,title,project_type,status,progress_percent,due_date,created_at,project_members(user_id,profiles(display_name,email))").order("created_at",{ascending:false});
 const {data:clients,error:cErr}=await client.from("profiles").select("id,display_name,email,created_at").eq("role","client").order("created_at",{ascending:false});
 const {data:requests,error:rErr}=await client.from("project_requests").select("*").order("created_at",{ascending:false});
 if(pErr)throw pErr;if(cErr)throw cErr;if(rErr)throw rErr;
