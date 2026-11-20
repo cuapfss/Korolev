@@ -5,7 +5,7 @@
   const $=id=>document.getElementById(id);
   const authView=$("auth-view"),accountView=$("account-view"),form=$("auth-form"),note=$("config-note");
   const authMessage=$("auth-message"),submit=$("auth-submit"),tabs=[...document.querySelectorAll(".auth-tab")];
-  let client,mode="login",currentUser=null,profile=null,enrolledFactor=null,pendingFactor=null;
+  let client,mode="login",currentUser=null,profile=null,enrolledFactor=null,pendingFactor=null,loginFactorId=null,routing=false;
   const say=(el,msg,error=false)=>{if(!el)return;el.textContent=msg;el.classList.toggle("error",error)};
   function setMode(next){mode=next;tabs.forEach(t=>t.classList.toggle("active",t.dataset.mode===mode));$("name-field").hidden=mode!=="signup";form.elements.password.autocomplete=mode==="signup"?"new-password":"current-password";$("auth-title").textContent=mode==="signup"?"Создайте аккаунт.":"С возвращением."; $("auth-subtitle").textContent=mode==="signup"?"Зарегистрируйтесь, чтобы работать со студией в одном пространстве.":"Введите email и пароль, чтобы продолжить.";submit.innerHTML=mode==="signup"?"Создать аккаунт <span>↗</span>":"Войти в кабинет <span>↗</span>";say(authMessage,"")}
   tabs.forEach(t=>t.addEventListener("click",()=>setMode(t.dataset.mode)));
@@ -22,7 +22,28 @@
     if(error) say($("session-message"),"Не удалось загрузить профиль: "+error.message,true);
     await loadProjects();await refreshMfa();
   }
-  function showSession(user){authView.hidden=true;accountView.hidden=false;note.classList.add("ready");loadProfile(user).catch(e=>say($("session-message"),e.message,true))}
+  function showSession(user){$("login-mfa").hidden=true;authView.hidden=true;accountView.hidden=false;note.classList.add("ready");loadProfile(user).catch(e=>say($("session-message"),e.message,true))}
+  async function routeSession(user){
+    if(!user||routing)return;
+    routing=true;
+    try{
+      const {data,error}=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if(error)throw error;
+      if(data.nextLevel==="aal2"&&data.currentLevel!=="aal2"){
+        const {data:factors,error:factorError}=await client.auth.mfa.listFactors();
+        if(factorError)throw factorError;
+        const factor=(factors.totp||[]).find(f=>f.status==="verified");
+        if(!factor){showSession(user);return}
+        loginFactorId=factor.id;
+        const {error:challengeError}=await client.auth.mfa.challenge({factorId:loginFactorId});
+        if(challengeError)throw challengeError;
+        authView.hidden=false;accountView.hidden=true;$("login-mfa").hidden=false;
+        $("auth-title").textContent="Подтвердите вход.";$("auth-subtitle").textContent="Введите одноразовый код из приложения-аутентификатора.";
+        say($("login-mfa-feedback"),"");
+      }else showSession(user);
+    }catch(err){showSession(user);say($("session-message"),"Не удалось проверить 2FA: "+err.message,true)}
+    finally{routing=false}
+  }
   function activateSection(name){document.querySelectorAll(".portal-nav-item").forEach(b=>b.classList.toggle("active",b.dataset.section===name));document.querySelectorAll(".portal-section").forEach(s=>s.classList.toggle("active",s.id==="section-"+name));}
   document.querySelectorAll(".portal-nav-item").forEach(b=>b.addEventListener("click",()=>activateSection(b.dataset.section)));
   document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>activateSection(b.dataset.go)));
@@ -43,9 +64,20 @@
   $("mfa-remove").addEventListener("click",async()=>{if(!enrolledFactor)return;say($("mfa-feedback"),"Отключаем…");const {error}=await client.auth.mfa.unenroll({factorId:enrolledFactor.id});if(error){say($("mfa-feedback"),error.message,true);return}say($("mfa-feedback"),"Двухфакторная защита отключена.");await refreshMfa()});
   if(!configured||!lib){note.textContent="Для входа подключите проект Supabase в supabase/config.js. Используйте только публичный publishable/anon key, никогда не service_role.";form.addEventListener("submit",e=>{e.preventDefault();say(authMessage,"Подключение Supabase не настроено.",true)});return}
   client=lib(cfg.url,cfg.anonKey);note.classList.add("ready");
-  client.auth.getSession().then(({data})=>{if(data.session?.user)showSession(data.session.user)});
-  client.auth.onAuthStateChange((_event,session)=>{if(session?.user)showSession(session.user);else showAuth()});
-  form.addEventListener("submit",async e=>{e.preventDefault();const email=form.elements.email.value.trim(),password=form.elements.password.value;submit.disabled=true;say(authMessage,mode==="signup"?"Создаём аккаунт…":"Проверяем данные…");try{if(mode==="signup"){const name=form.elements.name.value.trim();const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session?.user)showSession(data.session.user);else say(authMessage,"Проверьте почту и подтвердите адрес, затем войдите в кабинет.")}else{const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;if(data.user)showSession(data.user)}}catch(err){say(authMessage,err.message||"Не удалось выполнить запрос.",true)}finally{submit.disabled=false}});
+  client.auth.getSession().then(({data})=>{if(data.session?.user)routeSession(data.session.user)});
+  client.auth.onAuthStateChange((_event,session)=>{if(session?.user){if(!routing)routeSession(session.user)}else showAuth()});
+  $("login-mfa-submit").addEventListener("click",async()=>{
+    const code=$("login-mfa-code").value.trim();
+    if(!/^\d{6}$/.test(code)){say($("login-mfa-feedback"),"Введите шестизначный код.",true);return}
+    say($("login-mfa-feedback"),"Проверяем код…");
+    const {data:challenge,error:challengeError}=await client.auth.mfa.challenge({factorId:loginFactorId});
+    if(challengeError){say($("login-mfa-feedback"),challengeError.message,true);return}
+    const {error}=await client.auth.mfa.verify({factorId:loginFactorId,challengeId:challenge.id,code});
+    if(error){say($("login-mfa-feedback"),"Код не принят: "+error.message,true);return}
+    $("login-mfa").hidden=true;$("login-mfa-code").value="";
+    const {data:{user}}=await client.auth.getUser();if(user)showSession(user);
+  });
+  form.addEventListener("submit",async e=>{e.preventDefault();const email=form.elements.email.value.trim(),password=form.elements.password.value;submit.disabled=true;say(authMessage,mode==="signup"?"Создаём аккаунт…":"Проверяем данные…");try{if(mode==="signup"){const name=form.elements.name.value.trim();const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session?.user)showSession(data.session.user);else say(authMessage,"Проверьте почту и подтвердите адрес, затем войдите в кабинет.")}else{routing=true;const {data,error}=await client.auth.signInWithPassword({email,password});routing=false;if(error)throw error;if(data.user)await routeSession(data.user)}}catch(err){say(authMessage,err.message||"Не удалось выполнить запрос.",true)}finally{submit.disabled=false}});
   $("signout").addEventListener("click",async()=>{const {error}=await client.auth.signOut();if(error)say($("session-message"),error.message,true)});
   setMode("login");
 })();
