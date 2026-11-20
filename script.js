@@ -112,9 +112,9 @@ if(form){
    var contactValue=v.contact_value.value.trim();
    var method=v.contact.value;
    var payload={user_id:user?user.id:null,name:v.n.value.trim(),email:method==='Email'?contactValue:null,contact_value:contactValue,contact_method:method,project_type:v.t.value,area:v.a.value.trim()||null,location:v.location.value.trim()||null,services:v.services.value,budget:v.budget.value,description:v.d.value.trim()||null,references_url:v.references.value.trim()||null};
-   var result=await db.from('project_requests').insert(payload).select('id').single();
+   var result=await db.from('project_requests').insert(payload);
    if(result.error)throw result.error;
-   successId.textContent=result.data.id;
+   successId.textContent=L==='ru'?'Заявка сохранена в системе.':'Your request has been saved.';
    form.hidden=true;
    success.hidden=false;
   }catch(error){
