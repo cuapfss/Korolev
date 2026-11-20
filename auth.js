@@ -5,7 +5,7 @@
   const $=id=>document.getElementById(id);
   const authView=$("auth-view"),accountView=$("account-view"),form=$("auth-form"),note=$("config-note");
   const authMessage=$("auth-message"),submit=$("auth-submit"),tabs=[...document.querySelectorAll(".auth-tab")];
-  let client,mode="login",currentUser=null,profile=null,enrolledFactor=null,pendingFactor=null,loginFactorId=null,routing=false;
+  let client,mode="login",currentUser=null,profile=null,enrolledFactor=null,pendingFactor=null,loginFactorId=null,routing=false,clientProjects=[];
   const say=(el,msg,error=false)=>{if(!el)return;el.textContent=msg;el.classList.toggle("error",error)};
   function setMode(next){mode=next;tabs.forEach(t=>t.classList.toggle("active",t.dataset.mode===mode));$("name-field").hidden=mode!=="signup";form.elements.password.autocomplete=mode==="signup"?"new-password":"current-password";$("auth-title").textContent=mode==="signup"?"Создайте аккаунт.":"С возвращением."; $("auth-subtitle").textContent=mode==="signup"?"Зарегистрируйтесь, чтобы работать со студией в одном пространстве.":"Введите email и пароль, чтобы продолжить.";submit.innerHTML=mode==="signup"?"Создать аккаунт <span>↗</span>":"Войти в кабинет <span>↗</span>";say(authMessage,"")}
   tabs.forEach(t=>t.addEventListener("click",()=>setMode(t.dataset.mode)));
@@ -20,7 +20,7 @@
     $("side-name").textContent=name;$("side-email").textContent=user.email||"";$("welcome-title").textContent="Здравствуйте, "+name.split(" ")[0]+".";
     $("display-name").value=name;$("profile-email").value=user.email||"";setAvatar(profile.avatar_url,name);
     if(error) say($("session-message"),"Не удалось загрузить профиль: "+error.message,true);
-    await loadProjects();await loadRequests();await loadNotifications();await refreshMfa();translatePortalStatic(document.documentElement.lang||"ru");
+    await loadProjects();await loadProjectResources();await loadRequests();await loadNotifications();await refreshMfa();translatePortalStatic(document.documentElement.lang||"ru");
   }
   function showSession(user){$("login-mfa").hidden=true;authView.hidden=true;accountView.hidden=false;note.classList.add("ready");loadProfile(user).catch(e=>say($("session-message"),e.message,true))}
   async function routeSession(user){
@@ -49,12 +49,48 @@
   document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>activateSection(b.dataset.go)));
   async function loadProjects(){
     const {data,error}=await client.from("project_members").select("project_id,projects(id,title,project_type,status,progress_percent,due_date)").eq("user_id",currentUser.id);
-    const projects=(data||[]).map(x=>x.projects).filter(Boolean);$("project-count").textContent=String(projects.length);
-    const markup=projects.length?projects.map((p,i)=>'<article class="project-card"><span class="project-number">0'+(i+1)+'</span><div class="project-card-main"><strong>'+escapeHtml(p.title)+'</strong><small>'+escapeHtml(p.project_type||"Проект KOROLEV")+' · '+escapeHtml(p.status||"В работе")+'</small></div><div class="project-progress"><span style="width:'+Math.max(0,Math.min(100,Number(p.progress_percent)||0))+'%"></span></div></article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Пока нет проектов</strong><p>После согласования задачи студия добавит проект в ваш кабинет.</p></div></div>';
-    $("projects-list").innerHTML=markup;$("overview-projects").innerHTML=markup;translatePortalStatic(document.documentElement.lang||"ru");
+    clientProjects=(data||[]).map(x=>x.projects).filter(Boolean);$("project-count").textContent=String(clientProjects.length);
+    const ids=clientProjects.map(p=>p.id);let stages=[];
+    if(ids.length){const result=await client.from("project_stages").select("id,project_id,title,status,progress_percent,planned_end,sort_order").in("project_id",ids).order("sort_order");if(!result.error)stages=result.data||[]}
+    const markup=clientProjects.length?clientProjects.map((p,i)=>{const own=stages.filter(s=>s.project_id===p.id);return '<article class="project-card project-card-expanded"><span class="project-number">0'+(i+1)+'</span><div class="project-card-main"><strong>'+escapeHtml(p.title)+'</strong><small>'+escapeHtml(p.project_type||"Проект KOROLEV")+' · '+escapeHtml(p.status||"В работе")+'</small><div class="project-progress"><span style="width:'+Math.max(0,Math.min(100,Number(p.progress_percent)||0))+'%"></span></div>'+(p.due_date?'<small>Срок: '+new Date(p.due_date+"T00:00:00").toLocaleDateString("ru-RU")+'</small>':'')+(own.length?'<div class="stage-list">'+own.map(s=>'<div class="stage-row"><span>'+escapeHtml(s.title)+'</span><small>'+escapeHtml(({pending:"Ожидает",in_progress:"В работе",review:"На проверке",completed:"Завершён",blocked:"Приостановлен"})[s.status]||s.status)+'</small></div>').join("")+'</div>':'')+'</div></article>'}).join(""):'<div class="empty-state"><span>01</span><div><strong>Пока нет проектов</strong><p>После согласования задачи студия добавит проект в ваш кабинет.</p></div></div>';
+    $("projects-list").innerHTML=markup;$("overview-projects").innerHTML=markup;
+    const select=$("chat-project");if(select){select.innerHTML=clientProjects.length?clientProjects.map(p=>'<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.title)+'</option>').join(""):'<option value="">Нет доступных проектов</option>';select.disabled=!clientProjects.length;if(clientProjects.length)await loadMessages(clientProjects[0].id)}
+    translatePortalStatic(document.documentElement.lang||"ru");
     if(error)say($("session-message"),"Не удалось загрузить список проектов: "+error.message,true);
   }
- 
+  async function loadMessages(projectId){
+    const box=$("chat-messages");if(!box)return;
+    if(!projectId){box.innerHTML='<div class="empty-state">Сначала дождитесь подключения проекта.</div>';return}
+    const {data,error}=await client.from("project_messages").select("id,body,sender_id,created_at").eq("project_id",projectId).order("created_at",{ascending:true});
+    if(error){box.innerHTML='<div class="empty-state">Не удалось загрузить сообщения: '+escapeHtml(error.message)+'</div>';return}
+    box.innerHTML=(data||[]).length?data.map(m=>'<article class="chat-message '+(m.sender_id===currentUser.id?'mine':'')+'"><p>'+escapeHtml(m.body)+'</p><small>'+new Date(m.created_at).toLocaleString("ru-RU")+'</small></article>').join(""):'<div class="empty-state">Сообщений пока нет. Напишите первое.</div>';
+    box.scrollTop=box.scrollHeight;
+  }
+  $("chat-project").addEventListener("change",e=>loadMessages(e.target.value));
+  $("chat-form").addEventListener("submit",async e=>{
+    e.preventDefault();const projectId=$("chat-project").value,body=e.currentTarget.elements.body.value.trim();if(!projectId||!body)return;
+    say($("chat-feedback"),"Отправляем…");
+    const {error}=await client.from("project_messages").insert({project_id:projectId,sender_id:currentUser.id,body});
+    if(error){say($("chat-feedback"),error.message,true);return}
+    e.currentTarget.reset();say($("chat-feedback"),"Сообщение отправлено.");await loadMessages(projectId);
+  });
+  async function loadProjectResources(){
+    const ids=clientProjects.map(p=>p.id);
+    if(!ids.length){$("portal-files").innerHTML='<div class="empty-state">Файлы появятся после подключения проекта.</div>';$("portal-documents").innerHTML="";$("portal-payments").innerHTML='<div class="empty-state">Платежей пока нет.</div>';return}
+    const [filesRes,docsRes,payRes]=await Promise.all([
+      client.from("project_files").select("id,project_id,file_name,storage_path,category,created_at").in("project_id",ids).order("created_at",{ascending:false}),
+      client.from("project_documents").select("id,project_id,title,document_type,storage_path,status,created_at").in("project_id",ids).order("created_at",{ascending:false}),
+      client.from("project_payments").select("id,project_id,amount,currency,status,paid_at,created_at").in("project_id",ids).order("created_at",{ascending:false})
+    ]);
+    const projectName=id=>clientProjects.find(p=>p.id===id)?.title||"Проект";
+    const fileItems=[];
+    for(const f of filesRes.data||[]){const signed=await client.storage.from("project-files").createSignedUrl(f.storage_path,3600);const url=signed.data?.signedUrl;fileItems.push('<article class="project-card"><div class="project-card-main"><strong>'+escapeHtml(f.file_name)+'</strong><small>'+escapeHtml(projectName(f.project_id))+' · '+escapeHtml(f.category)+'</small></div>'+(url?'<a class="portal-secondary" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Открыть ↗</a>':'<small>Файл недоступен</small>')+'</article>')}
+    $("portal-files").innerHTML=filesRes.error?'<div class="empty-state">'+escapeHtml(filesRes.error.message)+'</div>':fileItems.join("")||'<div class="empty-state">Файлов пока нет.</div>';
+    const docs=[];
+    for(const d of docsRes.data||[]){const signed=d.storage_path?await client.storage.from("project-files").createSignedUrl(d.storage_path,3600):null;const url=signed?.data?.signedUrl;docs.push('<article class="project-card"><div class="project-card-main"><strong>'+escapeHtml(d.title)+'</strong><small>'+escapeHtml(projectName(d.project_id))+' · '+escapeHtml(d.document_type)+' · '+escapeHtml(d.status)+'</small></div>'+(url?'<a class="portal-secondary" href="'+escapeHtml(url)+'" target="_blank" rel="noopener">Открыть ↗</a>':'<span class="request-state">В обработке</span>')+'</article>')}
+    $("portal-documents").innerHTML=docs.join("");
+    $("portal-payments").innerHTML=payRes.error?'<div class="empty-state">'+escapeHtml(payRes.error.message)+'</div>':(payRes.data||[]).map(p=>'<article class="project-card"><div class="project-card-main"><strong>'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2}).format(Number(p.amount))+' '+escapeHtml(p.currency)+'</strong><small>'+escapeHtml(projectName(p.project_id))+' · '+escapeHtml(({pending:"Ожидает оплаты",paid:"Оплачен",failed:"Ошибка",refunded:"Возврат"})[p.status]||p.status)+'</small></div><small>'+new Date(p.paid_at||p.created_at).toLocaleDateString("ru-RU")+'</small></article>').join("")||'<div class="empty-state">Платежей пока нет.</div>';
+  }
   async function loadRequests(){
     const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
     if(error){say($("session-message"),"Не удалось загрузить заявки: "+error.message,true);return}
