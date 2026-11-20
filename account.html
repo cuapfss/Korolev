@@ -30,10 +30,12 @@
 <nav class="portal-nav" aria-label="Разделы кабинета">
 <button class="portal-nav-item active" data-section="overview"><span>01</span>Обзор</button>
 <button class="portal-nav-item" data-section="projects"><span>02</span>Мои проекты</button>
-<button class="portal-nav-item" data-section="messages"><span>03</span>Сообщения</button>
-<button class="portal-nav-item" data-section="files"><span>04</span>Документы</button>
-<button class="portal-nav-item" data-section="payments"><span>05</span>Оплата</button>
-<button class="portal-nav-item" data-section="settings"><span>06</span>Профиль и безопасность</button>
+<button class="portal-nav-item" data-section="requests"><span>03</span>Заявки</button>
+<button class="portal-nav-item" data-section="notifications"><span>04</span>Уведомления</button>
+<button class="portal-nav-item" data-section="messages"><span>05</span>Сообщения</button>
+<button class="portal-nav-item" data-section="files"><span>06</span>Документы</button>
+<button class="portal-nav-item" data-section="payments"><span>07</span>Оплата</button>
+<button class="portal-nav-item" data-section="settings"><span>08</span>Профиль и безопасность</button>
 </nav>
 <div class="sidebar-bottom"><a href="contacts.html">Связаться со студией ↗</a><button id="signout" type="button">Выйти из аккаунта</button></div>
 </aside>
@@ -45,6 +47,8 @@
 <div class="section-heading"><div><p class="eyebrow">01 / WORKSPACE</p><h2>Последние проекты</h2></div><button class="quiet-button" data-go="projects" type="button">Все проекты ↗</button></div>
 <div id="overview-projects" class="project-list"><div class="empty-state"><span>01</span><div><strong>Пока нет проектов</strong><p>После согласования задачи студия добавит проект в ваш кабинет.</p></div></div></div>
 </section>
+<section class="portal-section" id="section-requests"><div class="section-heading"><div><p class="eyebrow">03 / INQUIRIES</p><h2>Мои заявки</h2><p>Отправьте запрос в студию и следите за его статусом.</p></div></div><div id="requests-list" class="project-list"><div class="empty-state">Загружаем заявки…</div></div><article class="settings-card request-card"><h3>Новая заявка</h3><form id="portal-request-form"><label>Тип проекта<input name="project_type" required maxlength="160" placeholder="Например, проект частного дома"></label><label>Площадь или размеры<input name="area" placeholder="Например, 120 м²"></label><label>Локация<input name="location" placeholder="Город, страна"></label><label>Описание задачи<textarea name="description" placeholder="Расскажите, что требуется сделать"></textarea></label><button class="portal-primary compact" type="submit">Отправить заявку ↗</button><p class="form-feedback" id="portal-request-feedback" role="status"></p></form></article></section>
+<section class="portal-section" id="section-notifications"><div class="section-heading"><div><p class="eyebrow">04 / UPDATES</p><h2>Уведомления</h2><p>Обновления по заявкам и проектам.</p></div><button class="portal-secondary" id="notifications-refresh" type="button">Обновить</button></div><div id="notifications-list" class="project-list"><div class="empty-state">Загружаем уведомления…</div></div></section>
 <section class="portal-section" id="section-projects"><div class="section-heading"><div><p class="eyebrow">02 / YOUR WORK</p><h2>Мои проекты</h2><p>Статус, прогресс и основные сведения.</p></div></div><div id="projects-list" class="project-list"><div class="empty-state">Загружаем проекты…</div></div></section>
 <section class="portal-section" id="section-messages"><div class="section-heading"><div><p class="eyebrow">03 / COMMUNICATION</p><h2>Сообщения</h2><p>Переписка с командой по каждому проекту.</p></div></div><div class="empty-state"><span>03</span><div><strong>Чат будет доступен после подключения проекта</strong><p>История общения будет храниться внутри кабинета.</p></div></div></section>
 <section class="portal-section" id="section-files"><div class="section-heading"><div><p class="eyebrow">04 / DOCUMENTS</p><h2>Документы и файлы</h2><p>Чертежи, PDF, договоры и материалы проекта.</p></div></div><div class="empty-state"><span>04</span><div><strong>Пока нет файлов</strong><p>Материалы появятся здесь, когда студия прикрепит их к проекту.</p></div></div></section>
