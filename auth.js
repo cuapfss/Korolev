@@ -102,6 +102,25 @@
       "mfa-start":"Set up 2FA","mfa-remove":"Disable 2FA","signout":"Sign out","footer":"© KOROLEV — PRIVATE CLIENT SPACE"
     }
   };
+  const portalStaticText={"CLIENT SPACE":"КЛИЕНТСКОЕ ПРОСТРАНСТВО","Ваш проект.":"Your project.","В одном месте.":"In one place.","Рабочее пространство для общения со студией, контроля этапов и хранения проектных материалов.":"A workspace to communicate with the studio, track project stages and store project materials.","01 — Прозрачные этапы и сроки":"01 — Clear stages and timelines","02 — Чертежи и документы":"02 — Drawings and documents","03 — Связь со студией":"03 — Contact with the studio","ДОСТУП К КАБИНЕТУ":"CLIENT PORTAL ACCESS","● ЗАЩИЩЁННОЕ СОЕДИНЕНИЕ":"● SECURE CONNECTION","Имя и фамилия":"Full name","Как к вам обращаться":"How should we address you","Пароль":"Password","Не менее 8 символов":"At least 8 characters","Показать":"Show","Войти в кабинет":"Sign in","Для входа требуется код двухфакторной аутентификации.":"A two-factor authentication code is required to sign in.","Код из приложения":"Authenticator code","Подтвердить вход":"Confirm sign-in","Не отправляйте через кабинет данные банковских карт или пароли от сторонних сервисов.":"Do not send bank card details or passwords for other services through the portal.","Подключаем защищённый доступ…":"Connecting secure access…","Клиент":"Client","Связаться со студией ↗":"Contact the studio ↗","ЛИЧНЫЙ КАБИНЕТ / KOROLEV":"CLIENT PORTAL / KOROLEV","АККАУНТ АКТИВЕН":"ACCOUNT ACTIVE","ВАШЕ ПРОСТРАНСТВО":"YOUR SPACE","Архитектура начинается":"Architecture starts","с хорошего диалога.":"with a good conversation.","Здесь будут появляться обновления, этапы и материалы ваших проектов.":"Updates, stages and project materials will appear here.","Обсудить новый проект ↗":"Discuss a new project ↗","Активные проекты":"Active projects","Закреплённых за аккаунтом":"Assigned to your account","Непрочитанные сообщения":"Unread messages","Раздел будет подключён к чату":"Chat will be connected here","Документы":"Documents","Файлы ваших проектов":"Your project files","Последние проекты":"Recent projects","Все проекты ↗":"All projects ↗","Пока нет проектов":"No projects yet","После согласования задачи студия добавит проект в ваш кабинет.":"The studio will add a project to your portal once the brief is approved.","Статус, прогресс и основные сведения.":"Status, progress and key information.","Загружаем проекты…":"Loading projects…","Переписка с командой по каждому проекту.":"Messages with the team about each project.","Чат будет доступен после подключения проекта":"Chat will be available once a project is connected","История общения будет храниться внутри кабинета.":"Your conversation history will be stored in the portal.","Чертежи, PDF, договоры и материалы проекта.":"Drawings, PDFs, contracts and project materials.","Пока нет файлов":"No files yet","Материалы появятся здесь, когда студия прикрепит их к проекту.":"Materials will appear here when the studio attaches them to a project.","История платежей и финансовые документы.":"Payment history and financial documents.","Платежей пока нет":"No payments yet","Суммы и статусы будут отображаться после оформления проекта.":"Amounts and statuses will appear once a project is set up.","Управляйте данными и настройками входа.":"Manage your details and sign-in settings.","Подтвердить 2FA":"Confirm 2FA","Отключить 2FA":"Disable 2FA","Проверка…":"Checking…","Код подтверждения":"Verification code","Новый пароль":"New password","Повторите пароль":"Confirm password","Обновить пароль":"Update password","Сохранить профиль":"Save profile","Отображаемое имя":"Display name","Email аккаунта":"Account email","Личные данные":"Personal details","Смена пароля":"Change password","Двухфакторная аутентификация":"Two-factor authentication","Фотография профиля":"Profile photo","Загрузить фото":"Upload photo","JPG, PNG или WebP. До 3 МБ.":"JPG, PNG or WebP. Up to 3 MB.","Используйте уникальный пароль длиной не менее 8 символов.":"Use a unique password with at least 8 characters.","Дополнительный код из приложения-аутентификатора при входе.":"Use an authenticator app code when signing in.","Добавьте этот аккаунт в приложение-аутентификатор, затем введите код из 6 цифр.":"Add this account to your authenticator app, then enter the 6-digit code.","Выйти из аккаунта":"Sign out","На главную ↗":"Back to website ↗","Обзор":"Overview","Мои проекты":"My projects","Сообщения":"Messages","Документы и файлы":"Documents & files","Оплата":"Payments","Профиль и безопасность":"Profile & security","Добро пожаловать.":"Welcome.","С возвращением.":"Welcome back.","Введите email и пароль, чтобы продолжить.":"Enter your email and password to continue.","Создайте аккаунт.":"Create your account.","Зарегистрируйтесь, чтобы работать со студией в одном пространстве.":"Create an account to work with the studio in one place.","Регистрация":"Create account","Войти":"Sign in","Создать аккаунт":"Create account","Шаг":"Step"};
+  function translatePortalStatic(lang){
+    const pairs=lang==="en"?portalStaticText:Object.fromEntries(Object.entries(portalStaticText).map(([ru,en])=>[en,ru]));
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    let node;
+    while((node=walker.nextNode())){
+      const parent=node.parentElement;
+      if(!parent||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/i.test(parent.tagName))continue;
+      const raw=node.nodeValue,trimmed=raw.trim();
+      if(Object.prototype.hasOwnProperty.call(pairs,trimmed)){
+        node.nodeValue=raw.replace(trimmed,pairs[trimmed]);
+      }
+    }
+    document.querySelectorAll("input[placeholder],textarea[placeholder]").forEach(input=>{
+      const value=input.getAttribute("placeholder");
+      const translated=pairs[value];
+      if(translated)input.setAttribute("placeholder",translated);
+    });
+  }
   function setPortalLanguage(lang){
     const d=portalText[lang]||portalText.ru;
     document.documentElement.lang=lang;
@@ -133,6 +152,7 @@
     const sections=document.querySelectorAll(".portal-section .section-heading h2");
     const headingMap=lang==="ru"?["Последние проекты","Мои проекты","Сообщения","Документы и файлы","Оплата","Профиль и безопасность"]:["Recent projects","My projects","Messages","Documents & files","Payments","Profile & security"];
     sections.forEach((el,i)=>{if(headingMap[i])el.textContent=headingMap[i]});
+    translatePortalStatic(lang);
     try{localStorage.setItem("korolev-portal-lang",lang)}catch(e){}
   }
   $("portal-language")?.addEventListener("click",()=>setPortalLanguage((document.documentElement.lang||"ru")==="ru"?"en":"ru"));
