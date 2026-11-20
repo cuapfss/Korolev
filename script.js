@@ -21,7 +21,7 @@ function calc(){
     }
     unit*=FX;total*=FX;
   }
-  var nf=new Intl.NumberFormat(L==='ru'?'ru-RU':'en-US',{maximumFractionDigits:C==='USD'?2:0});
+  var nf=new Intl.NumberFormat(L==='ru'?'ru-RU':'en-US',{maximumFractionDigits:0});
   var symbol=C==='USD'?'$':'₽';
   document.getElementById('res').textContent=area>0?
     (L==='ru'?'Ориентир: ':'Estimate: ')+nf.format(unit)+' '+symbol+' / m² · '+
