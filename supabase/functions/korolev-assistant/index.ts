@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
         tools: [{ type: "image_generation", model: "gpt-image-2.5-flare" }],
         tool_choice: "auto",
         max_output_tokens: 900,
-        safety_identifier: userData.user.id,
+        safety_identifier: await crypto.subtle.digest("SHA-256", new TextEncoder().encode(userData.user.id + ":korolev-assistant")).then(buf => Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, "0")).join("")),
       }),
     });
     const result = await aiResponse.json();
