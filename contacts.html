@@ -16,8 +16,8 @@
 <div class="brief-progress"><span id="brief-step-label">Шаг 1 из 4</span><div class="brief-track"><span id="brief-progress-bar"></span></div></div>
 <div class="brief-step active" data-step="0"><p class="note">Сначала познакомимся.</p>
 <label><span data-i="fn">Ваше имя</span><input name="n" autocomplete="name" required data-ip="fnp" placeholder="Как к вам обращаться"></label>
-<label><span>Email для связи</span><input name="email" type="email" autocomplete="email" placeholder="name@example.com" required></label>
-<label><span>Как удобнее связаться?</span><select name="contact"><option>Telegram</option><option>Email</option><option>Телефон</option></select></label></div>
+<label><span id="contact-value-label">Telegram для связи</span><input name="contact_value" type="text" autocomplete="off" placeholder="@username или ссылка t.me/username" required></label>
+<label><span>Как удобнее связаться?</span><select name="contact"><option value="Telegram">Telegram</option><option value="Email">Email</option></select></label></div>
 <div class="brief-step" data-step="1"><p class="note">Расскажите, что будем проектировать.</p>
 <label><span data-i="ft">Тип проекта</span><select name="t"><option data-i="t1">Дизайн квартиры</option><option data-i="t2">Дизайн частного дома</option><option data-i="t3">Архитектурное проектирование</option><option data-i="t4">Планировка и 3D</option><option>Общественное пространство</option></select></label>
 <label><span data-i="fa">Площадь или размеры</span><input name="a" data-ip="fap" placeholder="Например, 75 м²"></label>
@@ -30,6 +30,6 @@
 <label><span>Ссылки на референсы (если есть)</span><input name="references" type="url" placeholder="https://..."></label>
 <p class="note">Файлы можно будет прикрепить после запуска личного кабинета. Пока отправьте заявку через Telegram или Email.</p></div>
 <div class="brief-actions"><button class="btn ghost" type="button" id="brief-prev" disabled>Назад</button><button class="btn" type="button" id="brief-next">Далее</button><button class="btn" type="submit" id="brief-submit" hidden>Подготовить заявку</button></div>
-<p class="note" id="brief-feedback" aria-live="polite">Заявка будет сохранена в системе. После отправки можно будет дополнительно написать нам в Telegram.</p></form></div></div></section></main>
+<p class="note" id="brief-feedback" aria-live="polite">Заявка будет сохранена в системе. После отправки можно будет дополнительно написать нам в Telegram.</p></form><div id="brief-success" class="settings-card" hidden><p class="eyebrow">KOROLEV / REQUEST</p><h2>Заявка отправлена.</h2><p>Мы сохранили обращение. Студия свяжется с вами выбранным способом.</p><p class="note">Номер заявки: <strong id="brief-success-id"></strong></p><a class="btn" href="https://t.me/vosopo">Открыть Telegram ↗</a><button class="btn ghost" type="button" id="brief-new-request">Отправить ещё одну заявку</button></div></div></div></section></main>
 <footer><div class="wrap"><div><strong style="color:var(--ink)">KOROLEV</strong><br><span data-i="tag">Архитектура и дизайн частных пространств</span></div><ul><li><a href="index.html" data-i="n_index">Главная</a></li><li><a href="services.html" data-i="n_services">Услуги</a></li><li><a href="portfolio.html" data-i="n_portfolio">Портфолио</a></li><li><a href="prices.html" data-i="n_prices">Цены</a></li><li><a href="about.html" data-i="n_about">О студии</a></li><li><a href="reviews.html" data-i="n_reviews">Отзывы</a></li><li><a href="contacts.html" data-i="n_contacts">Контакты</a></li><li><a href="https://t.me/vosopo">Telegram</a></li></ul></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase/config.js"></script><script src="script.js"></script></body></html>
