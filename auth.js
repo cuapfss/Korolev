@@ -205,6 +205,8 @@
       const translated=pairs[value];
       if(translated)input.setAttribute("placeholder",translated);
     });
+    const portalLabel=document.querySelector(".portal-header-right > span");
+    if(portalLabel)portalLabel.textContent=lang==="en"?"CLIENT SPACE":"КЛИЕНТСКОЕ ПРОСТРАНСТВО";
     applyPortalDashboardLanguage(lang);
   }
   function setPortalLanguage(lang){
