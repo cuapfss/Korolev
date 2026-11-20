@@ -102,16 +102,23 @@
       await loadStudioRequests();
     }
   }
+  function formatPortalDate(value){
+    if(!value)return "Дата не указана";
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return "Дата не указана";
+    return new Intl.DateTimeFormat("ru-RU",{day:"2-digit",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(date);
+  }
   async function loadStudioRequests(){
     const box=$("studio-requests");if(!box)return;
     const {data,error}=await client.from("project_requests").select("id,name,email,contact_value,contact_method,project_type,area,location,services,budget,description,references_url,status,created_at").order("created_at",{ascending:false});
     if(error){box.innerHTML='<div class="empty-state">Не удалось загрузить заявки: '+escapeHtml(error.message)+'</div>';return}
     const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
+    const field=(label,value)=>value?'<div class="request-detail"><span>'+label+'</span><strong>'+escapeHtml(String(value))+'</strong></div>':"";
     box.innerHTML=(data||[]).length?data.map(r=>{
       const contact=r.contact_value||r.email||"Не указан";
       const method=r.contact_method||"Контакт";
-      const details=[r.area,r.location,r.services,r.budget].filter(Boolean).join(" · ");
-      return '<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.name)+' · '+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleString("ru-RU")+'</small><small>'+escapeHtml(method)+': '+escapeHtml(contact)+'</small><small>'+escapeHtml(details)+'</small>'+(r.description?'<p>'+escapeHtml(r.description)+'</p>':'')+(r.references_url?'<a href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select></label></article>';
+      const details=field("Контакт · "+method,contact)+field("Площадь",r.area)+field("Локация",r.location)+field("Услуги",r.services)+field("Бюджет",r.budget);
+      return '<article class="project-card request-item request-studio-card"><div class="project-card-main"><div class="request-card-top"><strong>'+escapeHtml(r.name||"Без имени")+' — '+escapeHtml(r.project_type||"Тип проекта не указан")+'</strong><time>'+escapeHtml(formatPortalDate(r.created_at))+'</time></div><div class="request-details-grid">'+(details||'<div class="request-detail"><span>Детали</span><strong>Не указаны</strong></div>')+'</div>'+(r.description?'<div class="request-description"><span>Описание задачи</span><p>'+escapeHtml(r.description)+'</p></div>':'')+(r.references_url?'<a class="request-reference" href="'+escapeHtml(r.references_url)+'" target="_blank" rel="noopener">Открыть референсы ↗</a>':'')+'</div><label class="request-status-label">Статус<select class="studio-request-status" data-request-id="'+escapeHtml(r.id)+'"><option value="new" '+(r.status==="new"?"selected":"")+'>Новая</option><option value="reviewing" '+(r.status==="reviewing"?"selected":"")+'>На рассмотрении</option><option value="accepted" '+(r.status==="accepted"?"selected":"")+'>Принята</option><option value="declined" '+(r.status==="declined"?"selected":"")+'>Отклонена</option></select></label></article>';
     }).join(""):'<div class="empty-state">Новых обращений пока нет.</div>';
   }
 
