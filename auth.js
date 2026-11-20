@@ -20,7 +20,7 @@
     $("side-name").textContent=name;$("side-email").textContent=user.email||"";$("welcome-title").textContent="Здравствуйте, "+name.split(" ")[0]+".";
     $("display-name").value=name;$("profile-email").value=user.email||"";setAvatar(profile.avatar_url,name);
     if(error) say($("session-message"),"Не удалось загрузить профиль: "+error.message,true);
-    await loadProjects();await refreshMfa();translatePortalStatic(document.documentElement.lang||"ru");
+    await loadProjects();await loadRequests();await loadNotifications();await refreshMfa();translatePortalStatic(document.documentElement.lang||"ru");
   }
   function showSession(user){$("login-mfa").hidden=true;authView.hidden=true;accountView.hidden=false;note.classList.add("ready");loadProfile(user).catch(e=>say($("session-message"),e.message,true))}
   async function routeSession(user){
@@ -54,6 +54,33 @@
     $("projects-list").innerHTML=markup;$("overview-projects").innerHTML=markup;translatePortalStatic(document.documentElement.lang||"ru");
     if(error)say($("session-message"),"Не удалось загрузить список проектов: "+error.message,true);
   }
+ 
+  async function loadRequests(){
+    const {data,error}=await client.from("project_requests").select("id,project_type,area,location,description,status,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false});
+    if(error){say($("session-message"),"Не удалось загрузить заявки: "+error.message,true);return}
+    const labels={new:"Новая",reviewing:"На рассмотрении",accepted:"Принята",declined:"Отклонена"};
+    $("requests-list").innerHTML=(data||[]).length?data.map(r=>'<article class="project-card request-item"><div class="project-card-main"><strong>'+escapeHtml(r.project_type)+'</strong><small>'+new Date(r.created_at).toLocaleDateString("ru-RU")+' · '+escapeHtml(labels[r.status]||r.status)+'</small><small>'+escapeHtml([r.area,r.location].filter(Boolean).join(" · ")||"Детали не указаны")+'</small></div><span class="request-state">'+escapeHtml(labels[r.status]||r.status)+'</span></article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Заявок пока нет</strong><p>Вы можете отправить первую заявку через форму ниже.</p></div></div>';
+  }
+  $("portal-request-form").addEventListener("submit",async e=>{
+    e.preventDefault();const f=e.currentTarget,v=Object.fromEntries(new FormData(f).entries());say($("portal-request-feedback"),"Отправляем…");
+    const {error}=await client.from("project_requests").insert({user_id:currentUser.id,name:profile?.display_name||currentUser.email,email:currentUser.email,contact_method:"Email",project_type:v.project_type.trim(),area:v.area.trim()||null,location:v.location.trim()||null,description:v.description.trim()||null});
+    if(error){say($("portal-request-feedback"),error.message,true);return}
+    f.reset();say($("portal-request-feedback"),"Заявка отправлена. Студия увидит её в админ-панели.");await loadRequests();
+  });
+  async function loadNotifications(){
+    const {data,error}=await client.from("notifications").select("id,title,body,read_at,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(50);
+    if(error){say($("session-message"),"Не удалось загрузить уведомления: "+error.message,true);return}
+    const unread=(data||[]).filter(n=>!n.read_at).length;
+    const nav=document.querySelector('[data-section="notifications"]');if(nav)nav.innerHTML='<span>04</span>Уведомления'+(unread?' · '+unread:'');
+    $("notifications-list").innerHTML=(data||[]).length?data.map(n=>'<article class="project-card notification-card '+(!n.read_at?'unread':'')+'"><div class="project-card-main"><strong>'+escapeHtml(n.title)+'</strong><small>'+new Date(n.created_at).toLocaleString("ru-RU")+'</small><p>'+escapeHtml(n.body)+'</p></div>'+(!n.read_at?'<button class="portal-secondary mark-read" data-notification-id="'+escapeHtml(n.id)+'" type="button">Прочитано</button>':'<span class="request-state">Прочитано</span>')+'</article>').join(""):'<div class="empty-state"><span>01</span><div><strong>Пока нет уведомлений</strong><p>Здесь появятся обновления по вашим заявкам и проектам.</p></div></div>';
+  }
+  $("notifications-list").addEventListener("click",async e=>{
+    const button=e.target.closest(".mark-read");if(!button)return;
+    const {error}=await client.from("notifications").update({read_at:new Date().toISOString()}).eq("id",button.dataset.notificationId).eq("user_id",currentUser.id);
+    if(error){say($("session-message"),error.message,true);return}await loadNotifications();
+  });
+  $("notifications-refresh").addEventListener("click",()=>loadNotifications());
+
   function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
   $("profile-form").addEventListener("submit",async e=>{e.preventDefault();const name=$("display-name").value.trim();if(!name)return;say($("profile-feedback"),"Сохраняем…");const {error}=await client.from("profiles").update({display_name:name,updated_at:new Date().toISOString()}).eq("id",currentUser.id);if(error){say($("profile-feedback"),error.message,true);return}await client.auth.updateUser({data:{full_name:name}});$("side-name").textContent=name;$("welcome-title").textContent="Здравствуйте, "+name.split(" ")[0]+".";setAvatar(profile?.avatar_url,name);say($("profile-feedback"),"Имя профиля обновлено.")});
   $("avatar-input").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>3*1024*1024){say($("profile-feedback"),"Файл больше 3 МБ. Выберите изображение поменьше.",true);return}if(!["image/jpeg","image/png","image/webp"].includes(file.type)){say($("profile-feedback"),"Поддерживаются JPG, PNG и WebP.",true);return}say($("profile-feedback"),"Загружаем фотографию…");const ext=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";const path=currentUser.id+"/avatar."+ext;const {error:uploadError}=await client.storage.from("avatars").upload(path,file,{upsert:true,contentType:file.type});if(uploadError){say($("profile-feedback"),"Не удалось загрузить фото. Проверьте настройку хранилища: "+uploadError.message,true);return}const {data}=client.storage.from("avatars").getPublicUrl(path);const url=data.publicUrl+"?v="+Date.now();const {error}=await client.from("profiles").update({avatar_url:url,updated_at:new Date().toISOString()}).eq("id",currentUser.id);if(error){say($("profile-feedback"),error.message,true);return}profile.avatar_url=url;setAvatar(url,$("display-name").value);say($("profile-feedback"),"Фотография профиля обновлена.");e.target.value=""});
