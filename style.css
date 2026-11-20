@@ -283,3 +283,30 @@ html.page-leaving body{opacity:1!important;filter:none!important;transform:none!
   .ic{width:2.05rem;height:2.05rem}
   .menu{width:2.45rem;height:2.45rem}
 }
+
+
+/* KOROLEV assistant — floating glass interface */
+.ai-launcher{position:fixed;right:22px;bottom:22px;z-index:1200;width:58px;height:58px;border:1px solid #c5f46766;border-radius:50%;background:linear-gradient(145deg,#c5f467,#91c83f);color:#151915;box-shadow:0 10px 35px #0008;display:grid;place-items:center;cursor:pointer;font:700 1.25rem var(--f);transition:transform .2s,box-shadow .2s}
+.ai-launcher:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 42px #000a}
+.ai-launcher span{font-size:.7rem;letter-spacing:-.04em}
+.ai-panel{position:fixed;right:22px;bottom:92px;z-index:1201;width:min(390px,calc(100vw - 28px));height:min(590px,calc(100dvh - 125px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #c5f46738;border-radius:18px;background:color-mix(in srgb,#1b1f1c 93%,transparent);color:#f4f5f2;box-shadow:0 24px 80px #000a;backdrop-filter:blur(24px);opacity:0;visibility:hidden;transform:translateY(12px) scale(.98);transition:opacity .22s,transform .22s,visibility .22s}
+.ai-panel.is-open{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.ai-head{display:flex;align-items:center;justify-content:space-between;padding:17px 18px;border-bottom:1px solid #ffffff14}
+.ai-brand{display:flex;align-items:center;gap:11px}.ai-orb{width:34px;height:34px;border-radius:11px;background:#c5f467;color:#172015;display:grid;place-items:center;font-weight:800}
+.ai-brand strong{display:block;font-size:.9rem;letter-spacing:.02em}.ai-brand small{display:block;color:#a5aaa5;font-size:.72rem;margin-top:2px}
+.ai-close{border:0;background:transparent;color:#a5aaa5;font-size:1.45rem;cursor:pointer;padding:3px 7px}
+.ai-messages{flex:1;overflow:auto;padding:17px;display:flex;flex-direction:column;gap:12px}
+.ai-msg{max-width:88%;padding:11px 13px;border-radius:13px;background:#292e2a;color:#e9ece7;font-size:.87rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.ai-msg.user{align-self:flex-end;background:#c5f467;color:#172015;border-bottom-right-radius:4px}
+.ai-msg.bot{align-self:flex-start;border-bottom-left-radius:4px}
+.ai-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 12px}
+.ai-quick button{border:1px solid #c5f46755;border-radius:30px;padding:7px 10px;background:transparent;color:#dce5d5;font:500 .73rem var(--f);cursor:pointer}
+.ai-quick button:hover{background:#c5f46718}
+.ai-compose{padding:12px 14px 14px;border-top:1px solid #ffffff14}
+.ai-upload{display:flex;align-items:center;gap:8px;color:#a5aaa5;font-size:.73rem;margin-bottom:8px;cursor:pointer}.ai-upload input{display:none}
+.ai-compose-row{display:flex;align-items:flex-end;gap:8px}
+.ai-compose textarea{min-height:44px;max-height:110px;resize:none;border:1px solid #ffffff1b;border-radius:12px;background:#111512;color:#f4f5f2;padding:11px 12px;font:400 .85rem/1.4 var(--f);flex:1}
+.ai-send{width:44px;height:44px;border:0;border-radius:12px;background:#c5f467;color:#172015;font-size:1.1rem;cursor:pointer}.ai-send:disabled{opacity:.45;cursor:wait}
+.ai-status{font-size:.68rem;color:#929b90;margin-top:7px}
+.ai-file-name{color:#c5f467;font-size:.72rem;margin-bottom:6px}
+@media(max-width:600px){.ai-launcher{right:16px;bottom:16px;width:54px;height:54px}.ai-panel{right:10px;bottom:78px;width:calc(100vw - 20px);height:min(590px,calc(100dvh - 100px));border-radius:16px}}
