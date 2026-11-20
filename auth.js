@@ -153,10 +153,10 @@
     const headingMap=lang==="ru"?["Последние проекты","Мои проекты","Сообщения","Документы и файлы","Оплата","Профиль и безопасность"]:["Recent projects","My projects","Messages","Documents & files","Payments","Profile & security"];
     sections.forEach((el,i)=>{if(headingMap[i])el.textContent=headingMap[i]});
     translatePortalStatic(lang);
-    try{localStorage.setItem("korolev-portal-lang",lang)}catch(e){}
+    try{localStorage.setItem("korolev-portal-lang",lang);localStorage.setItem("k-lang",lang)}catch(e){}
   }
   $("portal-language")?.addEventListener("click",()=>setPortalLanguage((document.documentElement.lang||"ru")==="ru"?"en":"ru"));
-  let savedPortalLang="ru";try{savedPortalLang=localStorage.getItem("korolev-portal-lang")||"ru"}catch(e){}
+  let savedPortalLang="ru";try{savedPortalLang=localStorage.getItem("k-lang")||localStorage.getItem("korolev-portal-lang")||"ru"}catch(e){}
   setPortalLanguage(savedPortalLang);
   setMode("login");
 })();
