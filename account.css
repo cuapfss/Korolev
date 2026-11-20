@@ -78,7 +78,6 @@
 .profile-settings{grid-row:span 2}.avatar-editor{display:flex;align-items:center;gap:1rem;padding:.8rem 0 1.2rem;border-bottom:1px solid var(--p-line);margin-bottom:1rem}
 .upload-button{display:inline-flex!important;width:max-content;padding:.55rem .75rem;border:1px solid var(--p-line);border-radius:7px;color:var(--p-accent)!important;cursor:pointer}.upload-button input{display:none}
 .settings-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem}.security-state{font-size:.52rem}
-# mfa-qr{max-width:190px}
 #mfa-qr{display:block;width:180px;height:180px;object-fit:contain;padding:.6rem;background:#fff;border-radius:8px;margin:.8rem 0}
 #mfa-verify>p{font-size:.72rem;color:var(--p-muted);line-height:1.6}
 .danger-button{color:#e1a39a;border-color:#63443e}
