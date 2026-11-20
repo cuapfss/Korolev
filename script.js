@@ -157,14 +157,7 @@ setL(L);
     });
   });
   if(reduce)return;
-  // Compact logo intro with a lime line; removed from layout as soon as it fades.
-  var intro=document.createElement('div');
-  intro.className='korolev-preloader';
-  intro.setAttribute('aria-hidden','true');
-  intro.innerHTML='<div class="korolev-preloader__inner"><div class="korolev-preloader__logo">KOROLEV<span>.</span></div><div class="korolev-preloader__line"></div></div>';
-  body.appendChild(intro);
-  requestAnimationFrame(function(){requestAnimationFrame(function(){intro.classList.add('is-hidden')})});
-  window.setTimeout(function(){if(intro.parentNode)intro.parentNode.removeChild(intro)},850);
+  // The branded preloader is intentionally disabled: page changes use only a dark overlay.
   // Very restrained hero parallax; disabled on small screens and touch-first layouts.
   var hero=document.querySelector('.hero-content');
   var ticking=false;
@@ -191,3 +184,6 @@ setL(L);
     window.setTimeout(function(){window.location.href=url.href},230);
   });
 })();
+
+// Load the floating KOROLEV assistant on every public page.
+(function(){var s=document.createElement('script');s.src='assistant.js?v=20261120-1';s.defer=true;document.body.appendChild(s)})();
