@@ -63,3 +63,8 @@ grant select, insert on public.project_messages to authenticated;
 grant select, insert on public.project_files to authenticated;
 grant select on public.project_stages, public.project_documents, public.project_payments, public.notifications to authenticated;
 grant update(read_at) on public.notifications to authenticated;
+
+grant select, insert, update on public.projects to authenticated;
+grant select, insert, update on public.project_stages to authenticated;
+grant select, insert, update on public.project_documents to authenticated;
+grant select, insert, update on public.project_payments to authenticated;
