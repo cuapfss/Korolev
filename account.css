@@ -211,3 +211,33 @@
 .request-card-top time{display:flex;flex-wrap:wrap;gap:.4rem;font-variant-numeric:tabular-nums}
 .request-client-card .project-card-main{min-width:0}
 .request-status-pill{flex-shrink:0}
+
+
+/* KOROLEV client space — motion refinement */
+@media(prefers-reduced-motion:no-preference){
+  .portal-header{transition:background .3s ease,box-shadow .3s ease}
+  .portal .logo,.side-brand{transition:letter-spacing .3s ease,color .3s ease}
+  .portal .logo:hover,.side-brand:hover{letter-spacing:.24em;color:var(--p-accent)}
+  .portal-sidebar{animation:portal-side-in .65s cubic-bezier(.2,.7,.2,1) both}
+  .dashboard-top{animation:portal-rise .65s .08s both}
+  .overview-hero{animation:portal-rise .7s .16s both}
+  .overview-hero:after{animation:orbit-breathe 8s ease-in-out infinite}
+  .stat-grid article{animation:portal-rise .55s both}
+  .stat-grid article:nth-child(2){animation-delay:.08s}
+  .stat-grid article:nth-child(3){animation-delay:.16s}
+  .portal-nav-item{position:relative;overflow:hidden}
+  .portal-nav-item::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,#c5f46712,transparent);transform:translateX(-110%);transition:transform .55s ease}
+  .portal-nav-item:hover::after{transform:translateX(110%)}
+  .portal-primary,.portal-secondary,.quiet-button{transition:transform .22s ease,box-shadow .25s ease,border-color .25s ease,background .25s ease}
+  .portal-primary:hover,.portal-secondary:hover,.quiet-button:hover{transform:translateY(-2px)}
+  .portal-primary:active,.portal-secondary:active{transform:scale(.98)}
+  .project-card,.request-detail,.settings-card{transition:transform .28s cubic-bezier(.2,.7,.2,1),border-color .28s ease,box-shadow .28s ease}
+  .project-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px #0003}
+  .request-detail:hover{transform:translateY(-2px);border-color:#65764c}
+  .auth-card{animation:portal-card-in .8s .12s cubic-bezier(.2,.7,.2,1) both}
+  .auth-tabs button,.password-wrap button{transition:color .2s ease,border-color .2s ease}
+  .portal-section.active{animation:portal-rise .45s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes portal-side-in{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes portal-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes orbit-breathe{0%,100%{opacity:.55;transform:translateY(-50%) scale(.96)}50%{opacity:1;transform:translateY(-50%) scale(1.04)}}
+}
