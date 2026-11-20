@@ -153,3 +153,44 @@ a{transition:color .2s ease}
   @keyframes hero-enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
   .btn,.gal img{will-change:transform}
 }
+
+
+/* KOROLEV motion pass — restrained, responsive and accessible */
+@media(prefers-reduced-motion:no-preference){
+  html{scroll-behavior:smooth}
+  header{transition:background .3s ease,border-color .3s ease}
+  .logo{transition:letter-spacing .35s cubic-bezier(.2,.7,.2,1),color .25s ease}
+  .logo:hover{letter-spacing:.2em;color:var(--lime)}
+  nav a{position:relative;transition:color .25s ease}
+  nav a::after{content:"";position:absolute;left:0;right:100%;bottom:-3px;height:1px;background:var(--lime);transition:right .3s cubic-bezier(.2,.7,.2,1)}
+  nav a:hover::after,nav a[aria-current]::after{right:0}
+  .hero-kicker{animation:kicker-in .7s .08s both}
+  .hero-brand{transform-origin:left center;animation:brand-in 1s .12s cubic-bezier(.16,1,.3,1) both}
+  .hero-tagline{animation:rise-in .75s .28s both}
+  .hero .lead{animation:rise-in .75s .38s both}
+  .hero .row{animation:rise-in .75s .48s both}
+  .hero-brand span{display:inline-block;animation:lime-pulse 4s 1.4s ease-in-out infinite}
+  .list>div{transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .3s ease}
+  .list>div:hover{transform:translateY(-6px);border-color:var(--ink)}
+  .gal figure{overflow:hidden}
+  .gal img{transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s ease}
+  .gal figure:hover img{transform:scale(1.055);filter:saturate(1.12)}
+  .gal figcaption{transition:transform .35s ease,color .35s ease}
+  .gal figure:hover figcaption{transform:translateY(-3px);color:var(--lime)}
+  .btn{transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s ease,background .25s ease,color .25s ease}
+  .btn:active{transform:translateY(0) scale(.97)}
+  section.in .list>div{animation:rise-in .65s both}
+  section.in .list>div:nth-child(2){animation-delay:.08s}
+  section.in .list>div:nth-child(3){animation-delay:.16s}
+  section.in .gal figure{animation:rise-in .7s both}
+  section.in .gal figure:nth-child(2){animation-delay:.1s}
+  section.in .gal figure:nth-child(3){animation-delay:.2s}
+  @keyframes brand-in{from{opacity:0;transform:translateY(30px) scale(.97);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+  @keyframes rise-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes kicker-in{from{opacity:0;letter-spacing:.38em;transform:translateY(8px)}to{opacity:1;letter-spacing:.2em;transform:translateY(0)}}
+  @keyframes lime-pulse{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 24px #c5f46755}}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
