@@ -29,3 +29,16 @@ The database stores payment records and provider references only. Card details m
 Supabase free quotas and backup capabilities can change. Do not promise hourly recovery or indefinite retention until a separate backup process has been configured and tested. The requested hourly critical-data backup and daily full backup need scheduled exports to a separate destination.
 
 No staff/admin accounts should be created by changing a profile role from the browser. Role assignment must use a trusted administrative process.
+
+## Email registration (first live feature)
+
+1. In Supabase, open **Authentication → Providers → Email** and make sure Email is enabled.
+2. In **Authentication → URL Configuration**, add the deployed account page to the allowed redirect URLs:
+   `https://cuapfss.github.io/Korolev/account.html`
+   Set the site URL to `https://cuapfss.github.io/Korolev`.
+3. Open **Project Settings → API** and copy the Project URL and the publishable/anon public key.
+4. Put those two public values into `supabase/config.js`. This file is intentionally a browser config; never paste a `service_role` key here.
+5. Run `schema.sql` in the SQL Editor to create the user profile automatically when a new account is created.
+6. Test registration with an email address you can access. If email confirmation is enabled, the user must confirm the message before signing in.
+
+The current account page implements email/password sign-up, sign-in, session restore and sign-out. Google and Telegram sign-in are not enabled yet; they require separate provider configuration. Project data, chat, uploads, payment processing and admin authorization are later steps and must not be considered live just because account registration works.
