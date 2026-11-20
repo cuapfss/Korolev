@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap');
-:root{--paper:#f1f3f4;--ink:#161b1f;--mute:#56626a;--line:#c9d0d4;--blue:#1f4e8c;--card:#fff;
+:root{--paper:#f1f3f4;--ink:#161b1f;--mute:#56626a;--line:#c9d0d4;--blue:#1f4e8c;--lime:#c5f467;--card:#fff;
 --f:'Onest',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#12171a;--ink:#e9eef0;--mute:#98a5ac;--line:#2c353b;--blue:#8db4ee;--card:#192024}}:root[data-theme=dark]{--paper:#12171a;--ink:#e9eef0;--mute:#98a5ac;--line:#2c353b;--blue:#8db4ee;--card:#192024}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
