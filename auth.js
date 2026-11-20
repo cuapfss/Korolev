@@ -79,5 +79,64 @@
   });
   form.addEventListener("submit",async e=>{e.preventDefault();const email=form.elements.email.value.trim(),password=form.elements.password.value;submit.disabled=true;say(authMessage,mode==="signup"?"Создаём аккаунт…":"Проверяем данные…");try{if(mode==="signup"){const name=form.elements.name.value.trim();const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session?.user)showSession(data.session.user);else say(authMessage,"Проверьте почту и подтвердите адрес, затем войдите в кабинет.")}else{routing=true;const {data,error}=await client.auth.signInWithPassword({email,password});routing=false;if(error)throw error;if(data.user)await routeSession(data.user)}}catch(err){say(authMessage,err.message||"Не удалось выполнить запрос.",true)}finally{submit.disabled=false}});
   $("signout").addEventListener("click",async()=>{const {error}=await client.auth.signOut();if(error)say($("session-message"),error.message,true)});
+
+  const portalText={
+    ru:{
+      "portal-home-link":"На главную ↗","auth-title":"С возвращением.","auth-subtitle":"Введите email и пароль, чтобы продолжить.",
+      "welcome-title":"Добро пожаловать.","nav-overview":"Обзор","nav-projects":"Мои проекты","nav-messages":"Сообщения","nav-files":"Документы","nav-payments":"Оплата","nav-settings":"Профиль и безопасность",
+      "overview-title":"Архитектура начинается\\nс хорошего диалога.","overview-desc":"Здесь будут появляться обновления, этапы и материалы ваших проектов.",
+      "overview-link":"Обсудить новый проект ↗","projects-title":"Мои проекты","messages-title":"Сообщения","files-title":"Документы и файлы","payments-title":"Оплата","settings-title":"Профиль и безопасность",
+      "profile-title":"Личные данные","avatar-title":"Фотография профиля","avatar-desc":"JPG, PNG или WebP. До 3 МБ.","avatar-upload":"Загрузить фото",
+      "display-label":"Отображаемое имя","email-label":"Email аккаунта","save-profile":"Сохранить профиль ↗","password-title":"Смена пароля","password-desc":"Используйте уникальный пароль длиной не менее 8 символов.",
+      "new-password":"Новый пароль","confirm-password":"Повторите пароль","update-password":"Обновить пароль","mfa-title":"Двухфакторная аутентификация","mfa-desc":"Дополнительный код из приложения-аутентификатора при входе.",
+      "mfa-start":"Настроить 2FA","mfa-remove":"Отключить 2FA","signout":"Выйти из аккаунта","footer":"© KOROLEV — PRIVATE CLIENT SPACE"
+    },
+    en:{
+      "portal-home-link":"Back to website ↗","auth-title":"Welcome back.","auth-subtitle":"Enter your email and password to continue.",
+      "welcome-title":"Welcome.","nav-overview":"Overview","nav-projects":"My projects","nav-messages":"Messages","nav-files":"Documents","nav-payments":"Payments","nav-settings":"Profile & security",
+      "overview-title":"Architecture starts\\nwith a good conversation.","overview-desc":"Updates, project stages and materials will appear here.",
+      "overview-link":"Discuss a new project ↗","projects-title":"My projects","messages-title":"Messages","files-title":"Documents & files","payments-title":"Payments","settings-title":"Profile & security",
+      "profile-title":"Personal details","avatar-title":"Profile photo","avatar-desc":"JPG, PNG or WebP. Up to 3 MB.","avatar-upload":"Upload photo",
+      "display-label":"Display name","email-label":"Account email","save-profile":"Save profile ↗","password-title":"Change password","password-desc":"Use a unique password with at least 8 characters.",
+      "new-password":"New password","confirm-password":"Confirm password","update-password":"Update password","mfa-title":"Two-factor authentication","mfa-desc":"Use an authenticator app code when signing in.",
+      "mfa-start":"Set up 2FA","mfa-remove":"Disable 2FA","signout":"Sign out","footer":"© KOROLEV — PRIVATE CLIENT SPACE"
+    }
+  };
+  function setPortalLanguage(lang){
+    const d=portalText[lang]||portalText.ru;
+    document.documentElement.lang=lang;
+    const button=$("portal-language");if(button)button.textContent=lang==="ru"?"EN":"RU";
+    Object.keys(d).forEach(id=>{const el=$(id);if(el)el.textContent=d[id]});
+    const navKeys=["overview","projects","messages","files","payments","settings"];
+    document.querySelectorAll(".portal-nav-item").forEach((el,i)=>{const label=d["nav-"+navKeys[i]];if(label&&el.childNodes.length>1)el.childNodes[1].textContent=label});
+    const authTitle=$("auth-title");if(authTitle&&!currentUser){authTitle.textContent=lang==="ru"?(mode==="login"?"С возвращением.":"Создайте аккаунт."):(mode==="login"?"Welcome back.":"Create your account.");}
+    const authSubtitle=$("auth-subtitle");if(authSubtitle&&!currentUser)authSubtitle.textContent=lang==="ru"?(mode==="login"?"Введите email и пароль, чтобы продолжить.":"Зарегистрируйтесь, чтобы работать со студией в одном пространстве."):(mode==="login"?"Enter your email and password to continue.":"Create an account to work with the studio in one place.");
+    const tabs=document.querySelectorAll(".auth-tab");if(tabs[0])tabs[0].textContent=lang==="ru"?"Войти":"Sign in";if(tabs[1])tabs[1].textContent=lang==="ru"?"Регистрация":"Create account";
+    if(submit)submit.innerHTML=mode==="signup"?(lang==="ru"?"Создать аккаунт <span>↗</span>":"Create account <span>↗</span>"):(lang==="ru"?"Войти в кабинет <span>↗</span>":"Sign in <span>↗</span>");
+    const labels={
+      "display-name":lang==="ru"?"Имя и фамилия":"Full name",
+      "profile-email":lang==="ru"?"Email аккаунта":"Account email",
+      "mfa-code":lang==="ru"?"Код подтверждения":"Verification code"
+    };
+    Object.entries(labels).forEach(([id,label])=>{const input=$(id);if(input){const parent=input.closest("label");if(parent&&parent.firstChild)parent.firstChild.textContent=label}});
+    const settings=$("section-settings");
+    if(settings){
+      const cards=settings.querySelectorAll(".settings-card h3");
+      const titles=lang==="ru"?["Личные данные","Смена пароля","Двухфакторная аутентификация"]:["Personal details","Change password","Two-factor authentication"];
+      cards.forEach((el,i)=>{if(titles[i])el.textContent=titles[i]});
+      const paras=settings.querySelectorAll(".settings-card > p,.avatar-editor p");
+      const descriptions=lang==="ru"?["Используйте уникальный пароль длиной не менее 8 символов.","JPG, PNG или WebP. До 3 МБ."]:["Use a unique password with at least 8 characters.","JPG, PNG or WebP. Up to 3 MB."];
+      paras.forEach((el,i)=>{if(descriptions[i])el.textContent=descriptions[i]});
+      const upload=settings.querySelector(".upload-button");if(upload&&upload.childNodes[0])upload.childNodes[0].textContent=lang==="ru"?"Загрузить фото":"Upload photo";
+      const fields=settings.querySelectorAll("label");fields.forEach(label=>{const input=label.querySelector("input");if(!input)return;const map={"display-name":lang==="ru"?"Отображаемое имя":"Display name","profile-email":lang==="ru"?"Email аккаунта":"Account email","avatar-input":lang==="ru"?"Фотография профиля":"Profile photo"};if(map[input.id]&&label.childNodes[0])label.childNodes[0].textContent=map[input.id]});
+    }
+    const sections=document.querySelectorAll(".portal-section .section-heading h2");
+    const headingMap=lang==="ru"?["Последние проекты","Мои проекты","Сообщения","Документы и файлы","Оплата","Профиль и безопасность"]:["Recent projects","My projects","Messages","Documents & files","Payments","Profile & security"];
+    sections.forEach((el,i)=>{if(headingMap[i])el.textContent=headingMap[i]});
+    try{localStorage.setItem("korolev-portal-lang",lang)}catch(e){}
+  }
+  $("portal-language")?.addEventListener("click",()=>setPortalLanguage((document.documentElement.lang||"ru")==="ru"?"en":"ru"));
+  let savedPortalLang="ru";try{savedPortalLang=localStorage.getItem("korolev-portal-lang")||"ru"}catch(e){}
+  setPortalLanguage(savedPortalLang);
   setMode("login");
 })();
