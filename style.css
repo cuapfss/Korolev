@@ -98,3 +98,58 @@ input,select,textarea{background:var(--card);border-color:var(--line);color:var(
 .gal img{border:1px solid var(--line)}
 footer{border-color:var(--line)}
 @media(max-width:860px){nav{background:var(--paper)}}
+
+
+/* KOROLEV — modern dark minimalism */
+:root{
+  --paper:#151719;
+  --ink:#f4f5f2;
+  --mute:#a5aaa5;
+  --line:#303438;
+  --blue:#c5f467;
+  --card:#1d2022;
+  --lime:#c5f467;
+}
+:root[data-theme=dark],:root:not([data-theme=light]){
+  --paper:#151719;--ink:#f4f5f2;--mute:#a5aaa5;--line:#303438;--blue:#c5f467;--card:#1d2022;--lime:#c5f467;
+}
+:root[data-theme=light]{
+  --paper:#f2f3ef;--ink:#171a18;--mute:#626a63;--line:#d5d9d2;--blue:#789d35;--card:#fff;--lime:#789d35;
+}
+body{background:var(--paper);color:var(--ink)}
+header{border-color:var(--line);background:color-mix(in srgb,var(--paper) 84%,transparent);backdrop-filter:blur(18px)}
+.logo{letter-spacing:.12em;font-weight:600}
+nav a{font-size:.88rem}
+nav a:hover,nav a[aria-current]{border-color:var(--lime)}
+.hero{display:block;min-height:min(690px,calc(100svh - 68px));padding:clamp(5rem,13vw,10rem) 0 clamp(4rem,9vw,7rem);align-content:center}
+.hero-content{max-width:100%}
+.hero-kicker{margin:0 0 1.5rem;color:var(--lime);font-size:.76rem;font-weight:600;letter-spacing:.2em}
+.hero-brand{margin:0;font-size:clamp(5rem,17vw,14rem);font-weight:600;line-height:.78;letter-spacing:-.095em;white-space:nowrap}
+.hero-brand span{color:var(--lime)}
+.hero-tagline{margin:2.1rem 0 .7rem;font-size:clamp(1.35rem,3vw,2.25rem);font-weight:400;letter-spacing:-.04em}
+.hero .lead{max-width:52ch;margin:0 0 2rem;font-size:1.02rem}
+.btn{border:1px solid var(--lime);background:var(--lime);color:#171b13;border-radius:6px;font-weight:600;transition:transform .22s ease,background .22s ease,color .22s ease,border-color .22s ease}
+.btn:hover{background:transparent;color:var(--lime);transform:translateY(-2px)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--lime);color:var(--lime);background:transparent}
+.ic,.menu{border-radius:6px;background:var(--card);border-color:var(--line)}
+section{border-color:var(--line)}
+h2{font-weight:500;letter-spacing:-.045em}
+.list>div{border-top:1px solid var(--lime)}
+.gal{gap:1.1rem}
+.gal img{border:0;border-radius:5px;transition:transform .45s cubic-bezier(.2,.7,.2,1),filter .45s}
+.gal figure{overflow:hidden}
+.gal figure:hover img{transform:scale(1.025);filter:brightness(1.08)}
+a{transition:color .2s ease}
+:focus-visible{outline-color:var(--lime)}
+@media(max-width:860px){
+  .hero{min-height:auto;padding:6.5rem 0 5rem}
+  .hero-brand{font-size:clamp(4.2rem,17vw,8rem);white-space:normal}
+  .hero-tagline{margin-top:1.5rem}
+  nav{background:var(--paper)}
+}
+@media(prefers-reduced-motion:no-preference){
+  .hero-content{animation:hero-enter .8s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes hero-enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .btn,.gal img{will-change:transform}
+}
